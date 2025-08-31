@@ -1,69 +1,299 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Python Game Hub</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: #f0f0f0;
-      text-align: center;
-      padding: 50px;
-    }
-    h1 {
-      color: #ffcc00;
-    }
-    input, button {
-      padding: 10px 15px;
-      font-size: 16px;
-      margin: 10px;
-      border-radius: 5px;
-      border: none;
-    }
-    button {
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    a {
-      color: #f0f0f0;
-      text-decoration: none;
-      display: block;
-      margin-top: 20px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate Game Hub</title>
+<style>
+body { font-family: Arial, sans-serif; background:#121212; color:#f0f0f0; margin:0; padding:0;}
+h1,h2 { color:#ffcc00; }
+.container { padding:20px; max-width:900px; margin:auto;}
+button { padding:10px 20px; margin:5px; font-size:16px; cursor:pointer;}
+input { padding:5px; font-size:16px;}
+.game { display:none; margin-top:20px; }
+.leaderboard { background:#222; padding:10px; margin-top:10px; max-height:300px; overflow-y:auto;}
+.achievement { color:#00ffcc; font-weight:bold; }
+#reactionPrompt { font-size:24px; font-weight:bold; margin:20px 0; color:#00ffcc; }
+#typingText { font-family:monospace; font-size:18px; margin-bottom:10px; }
+</style>
 </head>
 <body>
-  <h1>Python Game Hub</h1>
-  <p>Enter your username to personalize your scores:</p>
-  <input type="text" id="username" placeholder="Your username" />
-  <br>
-  <button onclick="showInstructions()">Get Game Script</button>
+<div class="container">
+<h1>🎮 Ultimate Game Hub</h1>
+<div>
+<label>Enter Username: <input type="text" id="username" placeholder="Player1"></label>
+</div>
+<div>
+<h2>Select a Game:</h2>
+<button onclick="showGame('guess')">Guess the Number</button>
+<button onclick="showGame('math')">Math Quiz</button>
+<button onclick="showGame('reaction')">Reaction Game</button>
+<button onclick="showGame('typing')">Gibberish Typing</button>
+<button onclick="showGame('numMemory')">Number Memory</button>
+<button onclick="showGame('seqTap')">Sequence Tap</button>
+<button onclick="showGame('wordChain')">Word Memory Chain</button>
+</div>
 
-  <p id="instructions"></p>
+<!-- Game Divs -->
+<div id="guess" class="game"><h2>🎯 Guess the Number</h2><div id="guessContent"></div><div class="leaderboard" id="guessLeaderboard"></div><button onclick="backToMenu()">Back</button></div>
+<div id="math" class="game"><h2>🧮 Math Quiz</h2><div id="mathContent"></div><div class="leaderboard" id="mathLeaderboard"></div><button onclick="backToMenu()">Back</button></div>
+<div id="reaction" class="game"><h2>⚡ Reaction Game</h2><div id="reactionContent"></div><div class="leaderboard" id="reactionLeaderboard"></div><button onclick="backToMenu()">Back</button></div>
+<div id="typing" class="game"><h2>⌨️ Gibberish Typing</h2><div id="typingContent"></div><div id="typingText"></div><div class="leaderboard" id="typingLeaderboard"></div><button onclick="backToMenu()">Back</button></div>
+<div id="numMemory" class="game"><h2>🔢 Number Memory</h2><div id="numMemoryContent"></div><div class="leaderboard" id="numMemoryLeaderboard"></div><button onclick="backToMenu()">Back</button></div>
+<div id="seqTap" class="game"><h2>🟩 Sequence Tap</h2><div id="seqTapContent"></div><div class="leaderboard" id="seqTapLeaderboard"></div><button onclick="backToMenu()">Back</button></div>
+<div id="wordChain" class="game"><h2>📚 Word Memory Chain</h2><div id="wordChainContent"></div><div class="leaderboard" id="wordChainLeaderboard"></div><button onclick="backToMenu()">Back</button></div>
 
-  <a href="git.py" download>Download the Python Game Script</a>
-  <a href="https://github.com/YOUR_USERNAME/YOUR_REPO" target="_blank">View on GitHub</a>
-
-  <script>
-    function showInstructions() {
-      const name = document.getElementById('username').value.trim();
-      const instr = document.getElementById('instructions');
-      if(name === '') {
-        instr.innerHTML = "Please enter a username!";
-        return;
-      }
-      instr.innerHTML = `
-        Download <strong>git.py</strong> and run it in your terminal:<br>
-        <code>python git.py</code><br>
-        Then enter your username as: <strong>${name}</strong> when prompted in the game.
-      `;
+<script>
+// --------- Utility Functions ---------
+function showGame(id){
+    const username=document.getElementById('username').value.trim()||'Player';
+    document.querySelectorAll('.game').forEach(g=>g.style.display='none');
+    document.getElementById(id).style.display='block';
+    switch(id){
+        case 'guess': startGuess(username); break;
+        case 'math': startMath(username); break;
+        case 'reaction': startReaction(username); break;
+        case 'typing': startTyping(username); break;
+        case 'numMemory': startNumMemory(username); break;
+        case 'seqTap': startSeqTap(username); break;
+        case 'wordChain': startWordChain(username); break;
     }
-  </script>
+}
+function backToMenu(){document.querySelectorAll('.game').forEach(g=>g.style.display='none');}
+function saveLeaderboard(game, mode, entry){
+    let data=JSON.parse(localStorage.getItem('leaderboards')||'{}');
+    data[game]=data[game]||{};
+    data[game][mode]=data[game][mode]||[];
+    data[game][mode].push(entry);
+    data[game][mode].sort((a,b)=>{
+        if(a.score!==b.score) return b.score-a.score;
+        return (a.time||0)-(b.time||0);
+    });
+    data[game][mode]=data[game][mode].slice(0,100);
+    localStorage.setItem('leaderboards', JSON.stringify(data));
+}
+function showLeaderboard(game, mode, containerId){
+    const container=document.getElementById(containerId);
+    container.innerHTML='';
+    let data=JSON.parse(localStorage.getItem('leaderboards')||'{}');
+    if(!data[game]||!data[game][mode]){container.innerHTML='No scores yet!'; return;}
+    data[game][mode].forEach((e,i)=>{
+        const timeStr=e.time!==undefined?` (${e.time.toFixed(6)}s)`:'';
+        container.innerHTML+=`${i+1}. ${e.name} — ${e.score}${timeStr}<br>`;
+    });
+}
+
+// --------- Guess the Number with Difficulties ---------
+function startGuess(username){
+    const content=document.getElementById('guessContent');
+    content.innerHTML='';
+    let difficulties=[{name:'Very Easy',min:1,max:20},{name:'Easy',min:1,max:50},{name:'Normal',min:1,max:100},{name:'Hard',min:1,max:250},{name:'Extreme',min:1,max:1000}];
+    let select=document.createElement('select');
+    difficulties.forEach((d,i)=>{let opt=document.createElement('option'); opt.value=i; opt.innerText=d.name; select.appendChild(opt);});
+    const startBtn=document.createElement('button'); startBtn.innerText='Start';
+    content.appendChild(select); content.appendChild(startBtn);
+    startBtn.onclick=function(){
+        let diff=difficulties[select.value];
+        let min=diff.min, max=diff.max;
+        let number=Math.floor(Math.random()*(max-min+1))+min;
+        let attempts=0; let start=performance.now();
+        content.innerHTML='';
+        const input=document.createElement('input'); input.type='number'; input.placeholder='Your guess';
+        const button=document.createElement('button'); button.innerText='Guess';
+        const info=document.createElement('div');
+        button.onclick=function(){
+            let val=parseInt(input.value); attempts++;
+            if(val<number) info.innerText='Too low!';
+            else if(val>number) info.innerText='Too high!';
+            else{
+                let elapsed=(performance.now()-start)/1000;
+                info.innerHTML=`Correct! Attempts: ${attempts}, Time: ${elapsed.toFixed(6)}s`;
+                saveLeaderboard('guess',diff.name,{name:username,score:-attempts,time:elapsed});
+                showLeaderboard('guess',diff.name,'guessLeaderboard');
+                input.disabled=true; button.disabled=true;
+            }
+        };
+        content.appendChild(input); content.appendChild(button); content.appendChild(info);
+    };
+}
+
+// --------- Math Quiz with Modes ---------
+function startMath(username){
+    const content=document.getElementById('mathContent'); content.innerHTML='';
+    let modes=[{name:'5 Q',num:5},{name:'10 Q',num:10},{name:'20 Q',num:20}];
+    let select=document.createElement('select');
+    modes.forEach((m,i)=>{let opt=document.createElement('option'); opt.value=i; opt.innerText=m.name; select.appendChild(opt);});
+    const startBtn=document.createElement('button'); startBtn.innerText='Start';
+    content.appendChild(select); content.appendChild(startBtn);
+    startBtn.onclick=function(){
+        let mode=modes[select.value]; content.innerHTML='';
+        let numQ=mode.num; let correct=0; let qIndex=0;
+        let start=performance.now();
+        const input=document.createElement('input'); input.type='number';
+        const button=document.createElement('button'); button.innerText='Answer';
+        const info=document.createElement('div');
+        content.appendChild(input); content.appendChild(button); content.appendChild(info);
+        function nextQ(){
+            if(qIndex>=numQ){
+                let elapsed=(performance.now()-start)/1000;
+                info.innerHTML=`Correct: ${correct}/${numQ}, Time: ${elapsed.toFixed(6)}s`;
+                saveLeaderboard('math',mode.name,{name:username,score:correct,time:elapsed});
+                showLeaderboard('math',mode.name,'mathLeaderboard'); return;
+            }
+            let a=Math.floor(Math.random()*12)+1; let b=Math.floor(Math.random()*12)+1;
+            let ops=['+','-','*']; let op=ops[Math.floor(Math.random()*3)];
+            let answer=(op==='+')?a+b:(op==='-')?a-b:a*b;
+            info.innerText=`Q${qIndex+1}: ${a} ${op} ${b} = ?`;
+        }
+        button.onclick=function(){
+            if(parseInt(input.value)===answer) correct++;
+            qIndex++; input.value=''; nextQ();
+        };
+        nextQ();
+    };
+}
+
+// --------- Reaction Game with Rounds ---------
+function startReaction(username){
+    const content=document.getElementById('reactionContent');
+    content.innerHTML='';
+    let modes=[2,3,5,7,10,15,25];
+    let select=document.createElement('select');
+    modes.forEach((m,i)=>{let opt=document.createElement('option'); opt.value=i; opt.innerText=`${m} Rounds`; select.appendChild(opt);});
+    const startBtn=document.createElement('button'); startBtn.innerText='Start';
+    const promptDiv=document.createElement('div'); promptDiv.id='reactionPrompt';
+    content.appendChild(select); content.appendChild(startBtn); content.appendChild(promptDiv);
+    startBtn.onclick=function(){
+        let rounds=modes[select.value]; let round=0; let totalTime=0;
+        function nextRound(){
+            if(round>=rounds){
+                saveLeaderboard('reaction',`R${rounds}`,{name:username,score:0,time:totalTime});
+                showLeaderboard('reaction',`R${rounds}`,'reactionLeaderboard');
+                promptDiv.innerText=`Finished! Total Time: ${totalTime.toFixed(6)}s`;
+                return;
+            }
+            let delay=Math.random()*2000+1000;
+            promptDiv.innerText='Wait...';
+            setTimeout(()=>{
+                let start=performance.now();
+                promptDiv.innerText='CLICK NOW!';
+                function clickHandler(){ 
+                    let elapsed=(performance.now()-start)/1000;
+                    totalTime+=elapsed; round++;
+                    promptDiv.removeEventListener('click', clickHandler);
+                    nextRound();
+                }
+                promptDiv.addEventListener('click', clickHandler);
+            },delay);
+        }
+        nextRound();
+    };
+}
+
+// --------- Gibberish Typing with Modes ---------
+function startTyping(username){
+    const content=document.getElementById('typingContent'); const display=document.getElementById('typingText'); content.innerHTML='';
+    let modes=[5,10,15,20,25,30,35,40];
+    let select=document.createElement('select');
+    modes.forEach((m,i)=>{let opt=document.createElement('option'); opt.value=i; opt.innerText=`${m} words`; select.appendChild(opt);});
+    const startBtn=document.createElement('button'); startBtn.innerText='Start';
+    content.appendChild(select); content.appendChild(startBtn); content.appendChild(display);
+    startBtn.onclick=function(){
+        let count=modes[select.value];
+        let wordsList=['fjdks','akslf','qwert','plmok','nbvcx','zmxn','lkjh','oiuy','rewq','asdfg','yhnm','bvcd','plok','qazx','wsed','rfvt','tgby','uhji','okmn','plmj'];
+        let words=[]; for(let i=0;i<count;i++) words.push(wordsList[Math.floor(Math.random()*wordsList.length)]);
+        display.innerText=words.join(' ');
+        const input=document.createElement('input'); input.type='text';
+        const button=document.createElement('button'); button.innerText='Submit';
+        const info=document.createElement('div'); content.appendChild(input); content.appendChild(button); content.appendChild(info);
+        let start=performance.now();
+        button.onclick=function(){
+            let val=input.value.trim().split(/\s+/); let correct=0;
+            for(let i=0;i<words.length;i++) if(val[i]===words[i]) correct++;
+            let elapsed=(performance.now()-start)/1000;
+            if(correct===words.length){ info.innerText=`Perfect! Time: ${elapsed.toFixed(6)}s`; saveLeaderboard('typing',`W${count}`,{name:username,score:count,time:elapsed}); showLeaderboard('typing',`W${count}`,'typingLeaderboard'); }
+            else info.innerText=`Accuracy: ${correct}/${count}`;
+        };
+    };
+}
+
+// --------- Number Memory ---------
+function startNumMemory(username){
+    const content=document.getElementById('numMemoryContent'); content.innerHTML='';
+    let modes=[3,5,7,10]; // number of numbers to remember
+    let select=document.createElement('select');
+    modes.forEach((m,i)=>{let opt=document.createElement('option'); opt.value=i; opt.innerText=`${m} numbers`; select.appendChild(opt);});
+    const startBtn=document.createElement('button'); startBtn.innerText='Start';
+    content.appendChild(select); content.appendChild(startBtn);
+    startBtn.onclick=function(){
+        let count=modes[select.value]; let numbers=[]; for(let i=0;i<count;i++) numbers.push(Math.floor(Math.random()*90)+10);
+        const display=document.createElement('div'); display.innerText=numbers.join(' ');
+        const input=document.createElement('input'); input.type='text';
+        const button=document.createElement('button'); button.innerText='Submit';
+        const info=document.createElement('div'); content.innerHTML=''; content.appendChild(display); content.appendChild(input); content.appendChild(button); content.appendChild(info);
+        let start=performance.now();
+        button.onclick=function(){
+            let val=input.value.trim().split(/\s+/).map(Number); let correct=0;
+            for(let i=0;i<count;i++) if(val[i]===numbers[i]) correct++;
+            let elapsed=(performance.now()-start)/1000;
+            info.innerText=`Correct: ${correct}/${count}, Time: ${elapsed.toFixed(6)}s`;
+            saveLeaderboard('numMemory',`N${count}`,{name:username,score:correct,time:elapsed}); showLeaderboard('numMemory',`N${count}`,'numMemoryLeaderboard');
+        };
+    };
+}
+
+// --------- Sequence Tap ---------
+function startSeqTap(username){
+    const content=document.getElementById('seqTapContent'); content.innerHTML='';
+    let modes=[3,5,7,10];
+    let select=document.createElement('select');
+    modes.forEach((m,i)=>{let opt=document.createElement('option'); opt.value=i; opt.innerText=`${m} sequence`; select.appendChild(opt);});
+    const startBtn=document.createElement('button'); startBtn.innerText='Start';
+    content.appendChild(select); content.appendChild(startBtn);
+    startBtn.onclick=function(){
+        let count=modes[select.value]; let seq=[]; let buttons=['Red','Green','Blue','Yellow'];
+        for(let i=0;i<count;i++) seq.push(buttons[Math.floor(Math.random()*buttons.length)]);
+        const display=document.createElement('div'); display.innerText=seq.join(' ');
+        const input=document.createElement('input'); input.type='text';
+        const button=document.createElement('button'); button.innerText='Submit';
+        const info=document.createElement('div'); content.innerHTML=''; content.appendChild(display); content.appendChild(input); content.appendChild(button); content.appendChild(info);
+        let start=performance.now();
+        button.onclick=function(){
+            let val=input.value.trim().split(/\s+/); let correct=0;
+            for(let i=0;i<count;i++) if(val[i]===seq[i]) correct++;
+            let elapsed=(performance.now()-start)/1000;
+            info.innerText=`Correct: ${correct}/${count}, Time: ${elapsed.toFixed(6)}s`;
+            saveLeaderboard('seqTap',`S${count}`,{name:username,score:correct,time:elapsed}); showLeaderboard('seqTap',`S${count}`,'seqTapLeaderboard');
+        };
+    };
+}
+
+// --------- Word Memory Chain ---------
+function startWordChain(username){
+    const content=document.getElementById('wordChainContent'); content.innerHTML='';
+    let modes=[3,5,7,10];
+    let select=document.createElement('select');
+    modes.forEach((m,i)=>{let opt=document.createElement('option'); opt.value=i; opt.innerText=`${m} words`; select.appendChild(opt);});
+    const startBtn=document.createElement('button'); startBtn.innerText='Start';
+    content.appendChild(select); content.appendChild(startBtn);
+    startBtn.onclick=function(){
+        let count=modes[select.value]; let words=[]; let wordPool=['apple','banana','cat','dog','elephant','fish','grape','hat','ice','jungle','kite','lion','monkey','nest','orange'];
+        for(let i=0;i<count;i++) words.push(wordPool[Math.floor(Math.random()*wordPool.length)]);
+        const display=document.createElement('div'); display.innerText=words.join(' ');
+        const input=document.createElement('input'); input.type='text';
+        const button=document.createElement('button'); button.innerText='Submit';
+        const info=document.createElement('div'); content.innerHTML=''; content.appendChild(display); content.appendChild(input); content.appendChild(button); content.appendChild(info);
+        let start=performance.now();
+        button.onclick=function(){
+            let val=input.value.trim().split(/\s+/); let correct=0;
+            for(let i=0;i<count;i++) if(val[i]===words[i]) correct++;
+            let elapsed=(performance.now()-start)/1000;
+            info.innerText=`Correct: ${correct}/${count}, Time: ${elapsed.toFixed(6)}s`;
+            saveLeaderboard('wordChain',`W${count}`,{name:username,score:correct,time:elapsed}); showLeaderboard('wordChain',`W${count}`,'wordChainLeaderboard');
+        };
+    };
+}
+</script>
 </body>
 </html>
+
