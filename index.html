@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Python Game Hub</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #f0f0f0;
+      text-align: center;
+      padding: 50px;
+    }
+    h1 {
+      color: #ffcc00;
+    }
+    input, button {
+      padding: 10px 15px;
+      font-size: 16px;
+      margin: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    a {
+      color: #f0f0f0;
+      text-decoration: none;
+      display: block;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Python Game Hub</h1>
+  <p>Enter your username to personalize your scores:</p>
+  <input type="text" id="username" placeholder="Your username" />
+  <br>
+  <button onclick="showInstructions()">Get Game Script</button>
+
+  <p id="instructions"></p>
+
+  <a href="git.py" download>Download the Python Game Script</a>
+  <a href="https://github.com/YOUR_USERNAME/YOUR_REPO" target="_blank">View on GitHub</a>
+
+  <script>
+    function showInstructions() {
+      const name = document.getElementById('username').value.trim();
+      const instr = document.getElementById('instructions');
+      if(name === '') {
+        instr.innerHTML = "Please enter a username!";
+        return;
+      }
+      instr.innerHTML = `
+        Download <strong>git.py</strong> and run it in your terminal:<br>
+        <code>python git.py</code><br>
+        Then enter your username as: <strong>${name}</strong> when prompted in the game.
+      `;
+    }
+  </script>
+</body>
+</html>
