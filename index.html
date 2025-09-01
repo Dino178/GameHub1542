@@ -1,785 +1,315 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Ultimate Game Hub — All Games</title>
-<style>
-  :root{
-    --bg:#0b0c0e; --panel:#111214; --muted:#9aa0a6; --accent:#ffd166;
-    --card:#141518; --ok:#2ecc71; --bad:#e74c3c;
-  }
-  body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:#e7eef6}
-  header{background:var(--panel);padding:18px 24px;text-align:center}
-  header h1{margin:0;color:var(--accent)}
-  main{max-width:1100px;margin:18px auto;padding:18px}
-  .menu, .panel{background:var(--card);padding:16px;border-radius:10px;margin-bottom:14px}
-  button{background:#1f2226;color:#fff;border:0;padding:8px 12px;border-radius:8px;margin:6px;cursor:pointer}
-  select,input,textarea{padding:8px;border-radius:8px;border:1px solid #222;background:#0e0f11;color:#fff}
-  label{color:var(--muted);margin-right:10px}
-  .controls{margin:8px 0}
-  .small{font-size:13px;color:var(--muted)}
-  .leaderboard{background:#0e1012;padding:10px;border-radius:8px;margin-top:12px;max-height:260px;overflow:auto;text-align:left}
-  .resultline{margin-top:8px;color:var(--muted)}
-  .achievement{color:var(--accent);font-weight:700;margin-top:6px;display:block}
-  #reactionArea{width:340px;height:140px;margin:14px auto;border-radius:10px;display:flex;align-items:center;justify-content:center;user-select:none;cursor:pointer}
-  .color-btn{width:64px;height:64px;border-radius:8px;display:inline-block;margin:6px;border:3px solid rgba(255,255,255,0.06);cursor:pointer}
-  .hidden{display:none}
-  .inline{display:inline-block}
-  .game-title{margin:0 0 8px 0}
-  ol{margin:8px 0 0 18px;padding:0}
-</style>
+  <meta charset="UTF-8">
+  <title>Skill Games Hub</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; }
+    #game { margin: 20px auto; padding: 20px; max-width: 600px; background: white; border-radius: 10px; box-shadow: 0 0 10px gray; }
+    button { margin: 10px; padding: 10px 20px; font-size: 16px; }
+    input { margin: 5px; padding: 5px; font-size: 16px; }
+    .leaderboard { margin-top: 20px; text-align: left; }
+  </style>
 </head>
 <body>
-<header><h1>Ultimate Game Hub</h1></header>
-<main>
-  <section class="menu" id="mainMenu">
-    <h2 class="game-title">Games</h2>
-    <div class="controls">
-      <button onclick="enterGame('guess')">Guess the Number</button>
-      <button onclick="enterGame('math')">Math Quiz</button>
-      <button onclick="enterGame('reaction')">Reaction Game</button>
-      <button onclick="enterGame('typing')">Gibberish Typing</button>
-      <button onclick="enterGame('numMemory')">Number Memory</button>
-      <button onclick="enterGame('seqTap')">Sequence Tap</button>
-      <button onclick="enterGame('wordChain')">Word Memory Chain</button>
-    </div>
-    <div class="small">Leaderboards persist in your browser (localStorage). Username is asked after selecting a game and cleared when you return to menu.</div>
-  </section>
+  <h1>🎮 Skill Games Hub</h1>
+  <div id="game"></div>
 
-  <!-- GUESS -->
-  <section class="panel hidden" id="panel-guess">
-    <h2 class="game-title">Guess the Number</h2>
-    <div class="controls">
-      <label>Difficulty:
-        <select id="guessMode">
-          <option value="1-50">Very Easy (1–50)</option>
-          <option value="1-100" selected>Normal (1–100)</option>
-          <option value="1-250">Hard (1–250)</option>
-          <option value="1-500">Very Hard (1–500)</option>
-          <option value="1-1000">Extreme (1–1000)</option>
-        </select>
-      </label>
-      <span id="guessNameArea"></span>
-      <button id="guessStartBtn">Start Game</button>
-    </div>
+  <script>
+    // ---- Leaderboard Storage ----
+    function getLeaderboard(game, mode) {
+      let data = JSON.parse(localStorage.getItem("leaderboard_" + game + "_" + mode) || "[]");
+      return data;
+    }
 
-    <div id="guessPlayArea" style="margin-top:12px"></div>
+    function saveLeaderboard(game, mode, entry, compareFn) {
+      let data = getLeaderboard(game, mode);
+      data.push(entry);
+      data.sort(compareFn);
+      if (data.length > 100) data = data.slice(0, 100);
+      localStorage.setItem("leaderboard_" + game + "_" + mode, JSON.stringify(data));
+    }
 
-    <div class="resultline">Player: <b id="guessPlayer"></b> — Attempts: <b id="guessAttempts">0</b> — Time: <b id="guessTime">0.000</b>s</div>
-    <div id="guessAchievements"></div>
-
-    <div class="leaderboard" id="lb-guess"></div>
-    <div style="margin-top:10px"><button onclick="returnToMenu()">Return to Menu</button></div>
-  </section>
-
-  <!-- MATH -->
-  <section class="panel hidden" id="panel-math">
-    <h2 class="game-title">Math Quiz</h2>
-    <div class="controls">
-      <label>Questions:
-        <select id="mathQCount"><option>5</option><option>10</option><option>20</option></select>
-      </label>
-      <span id="mathNameArea"></span>
-      <button id="mathStartBtn">Start</button>
-    </div>
-
-    <div id="mathPlayArea" style="margin-top:12px"></div>
-    <div class="resultline">Player: <b id="mathPlayer"></b> — Correct: <b id="mathCorrect">0</b> — Time: <b id="mathTime">0.000</b>s</div>
-    <div id="mathAchievements"></div>
-    <div class="leaderboard" id="lb-math"></div>
-    <div style="margin-top:10px"><button onclick="returnToMenu()">Return to Menu</button></div>
-  </section>
-
-  <!-- REACTION -->
-  <section class="panel hidden" id="panel-reaction">
-    <h2 class="game-title">Reaction Game (click, not Enter)</h2>
-    <div class="controls">
-      <label>Rounds:
-        <select id="reactionRounds">
-          <option>3</option><option>5</option><option>10</option><option>2</option><option>7</option><option>15</option><option>25</option>
-        </select>
-      </label>
-      <span id="reactionNameArea"></span>
-      <button id="reactionStartBtn">Start</button>
-    </div>
-
-    <div id="reactionPlay" style="margin-top:12px">
-      <div id="reactionArea" style="background:#333;color:#fff;border-radius:8px">Press Start</div>
-    </div>
-
-    <div class="resultline">Player: <b id="reactionPlayer"></b> — Total Time: <b id="reactionTotal">0.000</b>s</div>
-    <div id="reactionAchievements"></div>
-    <div class="leaderboard" id="lb-reaction"></div>
-    <div style="margin-top:10px"><button onclick="returnToMenu()">Return to Menu</button></div>
-  </section>
-
-  <!-- TYPING -->
-  <section class="panel hidden" id="panel-typing">
-    <h2 class="game-title">Gibberish Typing</h2>
-    <div class="controls">
-      <label>Words:
-        <select id="typingCount">
-          <option>5</option><option>10</option><option>15</option><option selected>20</option>
-          <option>25</option><option>30</option><option>35</option><option>40</option>
-        </select>
-      </label>
-      <span id="typingNameArea"></span>
-      <button id="typingStartBtn">Start</button>
-    </div>
-
-    <div id="typingPlay" style="margin-top:12px"></div>
-    <input id="typingInput" type="text" placeholder="Type exactly and press Enter" style="width:96%;margin-top:8px;padding:8px" disabled />
-    <div class="resultline">Player: <b id="typingPlayer"></b> — Time: <b id="typingTime">0.000</b>s</div>
-    <div id="typingAchievements"></div>
-    <div class="leaderboard" id="lb-typing"></div>
-    <div style="margin-top:10px"><button onclick="returnToMenu()">Return to Menu</button></div>
-  </section>
-
-  <!-- NUMBER MEMORY -->
-  <section class="panel hidden" id="panel-numMemory">
-    <h2 class="game-title">Number Memory</h2>
-    <div class="controls">
-      <label>Length:
-        <select id="numLength"><option>3</option><option>5</option><option>7</option><option selected>10</option></select>
-      </label>
-      <span id="numNameArea"></span>
-      <button id="numStartBtn">Start</button>
-    </div>
-    <div id="numPlay" style="margin-top:12px"></div>
-    <div class="resultline">Player: <b id="numPlayer"></b> — Time: <b id="numTime">0.000</b>s</div>
-    <div id="numAchievements"></div>
-    <div class="leaderboard" id="lb-numMemory"></div>
-    <div style="margin-top:10px"><button onclick="returnToMenu()">Return to Menu</button></div>
-  </section>
-
-  <!-- SEQUENCE TAP -->
-  <section class="panel hidden" id="panel-seqTap">
-    <h2 class="game-title">Sequence Tap (colors)</h2>
-    <div class="controls">
-      <label>Length:
-        <select id="seqLength"><option>3</option><option>4</option><option selected>6</option><option>8</option></select>
-      </label>
-      <span id="seqNameArea"></span>
-      <button id="seqStartBtn">Start</button>
-    </div>
-    <div id="seqPlay" style="margin-top:12px"></div>
-    <div class="resultline">Player: <b id="seqPlayer"></b> — Time: <b id="seqTime">0.000</b>s</div>
-    <div id="seqAchievements"></div>
-    <div class="leaderboard" id="lb-seqTap"></div>
-    <div style="margin-top:10px"><button onclick="returnToMenu()">Return to Menu</button></div>
-  </section>
-
-  <!-- WORD CHAIN -->
-  <section class="panel hidden" id="panel-wordChain">
-    <h2 class="game-title">Word Memory Chain</h2>
-    <div class="controls">
-      <label>Length:
-        <select id="wordLength"><option>3</option><option>5</option><option selected>7</option><option>10</option></select>
-      </label>
-      <span id="wordNameArea"></span>
-      <button id="wordStartBtn">Start</button>
-    </div>
-    <div id="wordPlay" style="margin-top:12px"></div>
-    <input id="wordInput" type="text" placeholder="Type words separated by spaces" style="width:96%;padding:8px;margin-top:8px" disabled />
-    <div class="resultline">Player: <b id="wordPlayer"></b> — Time: <b id="wordTime">0.000</b>s</div>
-    <div id="wordAchievements"></div>
-    <div class="leaderboard" id="lb-wordChain"></div>
-    <div style="margin-top:10px"><button onclick="returnToMenu()">Return to Menu</button></div>
-  </section>
-
-</main>
-
-<script>
-/* ---------------------------
-   Helper utilities & LB storage
-   ---------------------------*/
-function now(){ return performance.now(); } // high precision ms
-function msToSec(ms){ return ms/1000; }
-
-function lbKey(game, mode){ return 'LH_'+game+'_'+mode; }
-
-function saveToLB(game, mode, entry, comparator){
-  const key = lbKey(game,mode);
-  let arr = JSON.parse(localStorage.getItem(key) || '[]');
-  arr.push(entry);
-  // comparator is a function(a,b) -> negative if a better than b
-  arr.sort(comparator);
-  arr = arr.slice(0,100);
-  localStorage.setItem(key, JSON.stringify(arr));
-}
-
-function showLBIn(containerId, game, mode, fmt){
-  const key = lbKey(game,mode);
-  let arr = JSON.parse(localStorage.getItem(key) || '[]');
-  const container = document.getElementById(containerId);
-  if(!arr.length){ container.innerHTML = '<i>No scores yet for this mode.</i>'; return; }
-  let html = '<b>Top '+Math.min(arr.length,100)+'</b><ol>';
-  arr.forEach((e,i)=>{
-    html += '<li>' + escapeHTML(e.name) + ' — ' + fmt(e) + '</li>';
-  });
-  html += '</ol>';
-  container.innerHTML = html;
-}
-
-function escapeHTML(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-
-/* ---------------------------
-   Navigation
-   ---------------------------*/
-function hideAllPanels(){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.add('hidden'));
-}
-function returnToMenu(){
-  // Clear username (they asked it should be forgotten)
-  window.__playerName = '';
-  hideAllPanels();
-  document.getElementById('mainMenu').style.display = 'block';
-  // clear any possible timers by replacing play areas (simple approach)
-  document.querySelectorAll('[id$="Play"], [id$="PlayArea"]').forEach(n=>{ if(n) n.innerHTML=''; });
-}
-
-/* ---------------------------
-   Entry: user clicked a game button
-   We must ask username AFTER game selected (inside game panel)
-   ---------------------------*/
-function enterGame(key){
-  // show panel's username input area
-  hideAllPanels();
-  document.getElementById('mainMenu').style.display = 'none';
-  const panel = document.getElementById('panel-' + key);
-  if(!panel) return;
-  panel.classList.remove('hidden');
-
-  // show input area for username inside the panel (per-game)
-  const nameAreaId = {
-    guess:'guessNameArea', math:'mathNameArea', reaction:'reactionNameArea',
-    typing:'typingNameArea', numMemory:'numNameArea', seqTap:'seqNameArea', wordChain:'wordNameArea'
-  }[key];
-
-  const nameArea = document.getElementById(nameAreaId);
-  nameArea.innerHTML = '';
-  const inp = document.createElement('input'); inp.placeholder = 'Your name';
-  const startBtn = document.createElement('button'); startBtn.textContent = 'Start';
-  nameArea.appendChild(inp); nameArea.appendChild(startBtn);
-
-  // Reset per-panel displays & leaderboards
-  if(key==='guess') { document.getElementById('guessPlayArea').innerHTML=''; document.getElementById('lb-guess').innerHTML=''; }
-  if(key==='math')  { document.getElementById('mathPlayArea').innerHTML=''; document.getElementById('lb-math').innerHTML=''; }
-  if(key==='reaction'){ document.getElementById('reactionPlay').innerHTML=''; document.getElementById('lb-reaction').innerHTML=''; document.getElementById('reactionArea').textContent='Press Start'; document.getElementById('reactionArea').style.background='#333' }
-  if(key==='typing'){ document.getElementById('typingPlay').innerHTML=''; document.getElementById('lb-typing').innerHTML=''; document.getElementById('typingInput').value=''; }
-  if(key==='numMemory'){ document.getElementById('numPlay').innerHTML=''; document.getElementById('lb-numMemory').innerHTML=''; }
-  if(key==='seqTap'){ document.getElementById('seqPlay').innerHTML=''; document.getElementById('lb-seqTap').innerHTML=''; }
-  if(key==='wordChain'){ document.getElementById('wordPlay').innerHTML=''; document.getElementById('lb-wordChain').innerHTML=''; document.getElementById('wordInput').value=''; }
-
-  startBtn.onclick = ()=>{
-    const name = (inp.value || '').trim() || prompt('Enter your name:', 'Player') || 'Player';
-    // store name for this session only
-    window.__playerName = name;
-    // clear nameArea UI to show controls (or we leave it minimal)
-    nameArea.innerHTML = '<b>Player: </b>' + escapeHTML(name) + ' ';
-    // call specific game handlers to show inner controls and start
-    if(key==='guess') setupGuessPanel(name);
-    if(key==='math') setupMathPanel(name);
-    if(key==='reaction') setupReactionPanel(name);
-    if(key==='typing') setupTypingPanel(name);
-    if(key==='numMemory') setupNumMemoryPanel(name);
-    if(key==='seqTap') setupSeqTapPanel(name);
-    if(key==='wordChain') setupWordChainPanel(name);
-  };
-
-  inp.addEventListener('keydown', e=>{ if(e.key==='Enter') startBtn.click(); });
-}
-
-/* ---------------------------
-   Game: Guess the Number
-   - rank by attempts (lower better), tiebreaker time
-   - show attempts/time separately
-   - disable submission after finish
-   ---------------------------*/
-function setupGuessPanel(playerName){
-  const play = document.getElementById('guessPlayArea');
-  const modeSel = document.getElementById('guessMode');
-  document.getElementById('guessPlayer').textContent = playerName;
-  document.getElementById('guessAttempts').textContent = '0';
-  document.getElementById('guessTime').textContent = '0.000';
-  document.getElementById('guessAchievements').innerHTML = '';
-  document.getElementById('lb-guess').innerHTML = ''; // will show after finish
-
-  // Create interface
-  play.innerHTML = '';
-  const startBtn = document.getElementById('guessStartBtn');
-  startBtn.onclick = ()=> startGuess(roundGuess);
-  // if you click start we begin
-  function roundGuess(){
-    startBtn.disabled = true;
-  }
-
-  // Implement startGuess function to be used when the user clicked Start
-  function startGuess(callbackAfterStart){
-    const rangeText = modeSel.value; // like "1-100"
-    const parts = rangeText.split('-'); const min = parseInt(parts[0],10)||1; const max = parseInt(parts[1],10)||100;
-    const secret = Math.floor(Math.random()*(max-min+1)) + min;
-    let attempts = 0;
-    const t0 = now();
-    // Build UI
-    play.innerHTML = '';
-    const prompt = document.createElement('div'); prompt.textContent = `I'm thinking of a number between ${min} and ${max}. Guess:`; play.appendChild(prompt);
-    const input = document.createElement('input'); input.type='number'; input.min=min; input.max=max; input.style.marginRight='6px';
-    const submit = document.createElement('button'); submit.textContent='Submit';
-    const feedback = document.createElement('div');
-    play.appendChild(input); play.appendChild(submit); play.appendChild(feedback);
-
-    function finish(){
-      const elapsed = msToSec(now() - t0);
-      document.getElementById('guessAttempts').textContent = attempts;
-      document.getElementById('guessTime').textContent = elapsed.toFixed(3);
-      // achievements
-      const ach = [];
-      if(attempts===1) ach.push('🏅 Lucky First Guess!');
-      if(elapsed < 5) ach.push('⚡ Speedy <5s!');
-      document.getElementById('guessAchievements').innerHTML = ach.map(a=>'<span class="achievement">'+a+'</span>').join('');
-      // save LB: comparator by attempts asc then time asc
-      saveToLB('guess', rangeText, {name:playerName, score:attempts, time:elapsed}, (a,b)=>{
-        if(a.score !== b.score) return a.score - b.score;
-        return a.time - b.time;
+    function showLeaderboard(game, mode, compareFn) {
+      let data = getLeaderboard(game, mode).sort(compareFn);
+      let html = "<h3>🏆 Leaderboard</h3><ol>";
+      data.forEach(e => {
+        html += `<li>${e.name} — Score: ${e.score}, Time: ${(e.timeTaken/1000).toFixed(3)}s</li>`;
       });
-      showLBIn('lb-guess', 'guess', rangeText, e => `Attempts: ${e.score} — ${e.time.toFixed(3)}s`);
-      // disable controls
-      input.disabled = true; submit.disabled = true;
-      // return to menu after short pause
-      setTimeout(()=>returnToMenu(), 4000);
+      html += "</ol>";
+      return html;
     }
 
-    submit.onclick = ()=>{
-      if(submit.disabled) return;
-      const v = parseInt(input.value);
-      if(Number.isNaN(v)){ feedback.textContent = 'Enter a number'; return;}
-      attempts++;
-      document.getElementById('guessAttempts').textContent = attempts;
-      if(v < secret) feedback.textContent = 'Too low.';
-      else if(v > secret) feedback.textContent = 'Too high.';
-      else { feedback.textContent = 'Correct!'; finish(); }
-      input.value = '';
-    };
-    input.addEventListener('keydown', e=>{ if(e.key === 'Enter') submit.click(); });
+    // ---- Menu ----
+    function showMenu() {
+      document.getElementById("game").innerHTML = `
+        <h2>Select a Game</h2>
+        <button onclick="askUsername('guess')">Guess the Number</button>
+        <button onclick="askUsername('math')">Math Quiz</button>
+        <button onclick="askUsername('reaction')">Reaction Test</button>
+        <button onclick="askUsername('typing')">Gibberish Typing</button>
+        <button onclick="askUsername('numberMemory')">Number Memory</button>
+        <button onclick="askUsername('sequenceTap')">Sequence Tap</button>
+        <button onclick="askUsername('wordMemory')">Word Memory Chain</button>
+      `;
+    }
 
-    if(callbackAfterStart) callbackAfterStart();
-  }
-}
+    function askUsername(game) {
+      document.getElementById("game").innerHTML = `
+        <h2>Enter Username</h2>
+        <input id="usernameInput" type="text" placeholder="Your name">
+        <button onclick="startGame('${game}')">Start</button>
+      `;
+      document.getElementById("usernameInput").addEventListener("keydown", e => {
+        if (e.key === "Enter") startGame(game);
+      });
+    }
 
-/* ---------------------------
-   Game: Math Quiz
-   - store score as negative correct so we can sort ascending (lower is better)
-   - tie-breaker is time (lower better)
-   ---------------------------*/
-function setupMathPanel(playerName){
-  const play = document.getElementById('mathPlayArea');
-  document.getElementById('mathPlayer').textContent = playerName;
-  document.getElementById('mathCorrect').textContent = '0';
-  document.getElementById('mathTime').textContent = '0.000';
-  document.getElementById('mathAchievements').innerHTML = '';
-  document.getElementById('lb-math').innerHTML = '';
+    function startGame(game) {
+      const username = document.getElementById("usernameInput").value.trim();
+      if (!username) return alert("Enter a username!");
+      if (game === "guess") startGuess(username);
+      if (game === "math") startMath(username);
+      if (game === "reaction") startReaction(username);
+      if (game === "typing") startTyping(username);
+      if (game === "numberMemory") startNumberMemory(username);
+      if (game === "sequenceTap") startSequenceTap(username);
+      if (game === "wordMemory") startWordMemory(username);
+    }
 
-  const startBtn = document.getElementById('mathStartBtn');
-  startBtn.onclick = ()=> startMathRound();
-  function startMathRound(){
-    startBtn.disabled = true;
-    const total = parseInt(document.getElementById('mathQCount').value,10);
-    let idx=0, correct=0;
-    const t0 = now();
-    play.innerHTML = '';
-    const qDiv = document.createElement('div'); const input = document.createElement('input'); input.type='number'; const submit = document.createElement('button'); submit.textContent='Submit';
-    const feedback = document.createElement('div');
-    play.appendChild(qDiv); play.appendChild(input); play.appendChild(submit); play.appendChild(feedback);
+    // ---- Guess the Number ----
+    function startGuess(username) {
+      const target = Math.floor(Math.random() * 100) + 1;
+      let attempts = 0;
+      const start = performance.now();
 
-    function newQ(){
-      if(idx >= total){
-        const elapsed = msToSec(now() - t0);
-        document.getElementById('mathCorrect').textContent = correct;
-        document.getElementById('mathTime').textContent = elapsed.toFixed(3);
-        if(correct === total) document.getElementById('mathAchievements').innerHTML = '<span class="achievement">🏆 Perfect Score!</span>';
-        // save LB: score = -correct (so lower is better), tiebreaker time ascending
-        saveToLB('math', String(total), {name:playerName, score:-correct, time:elapsed}, (a,b)=>{
-          if(a.score !== b.score) return a.score - b.score;
-          return a.time - b.time;
-        });
-        showLBIn('lb-math','math', String(total), e => `Correct: ${-e.score} — ${e.time.toFixed(3)}s`);
-        input.disabled = true; submit.disabled = true;
-        setTimeout(()=>returnToMenu(), 4000);
-        return;
+      document.getElementById("game").innerHTML = `
+        <h2>Guess the Number (1-100)</h2>
+        <input id="guessInput" type="number" min="1" max="100">
+        <button onclick="checkGuess()">Submit</button>
+        <p id="feedback"></p>
+      `;
+
+      function endGame(success) {
+        const timeTaken = performance.now() - start;
+        document.getElementById("game").innerHTML = `
+          <h2>${success ? "Correct!" : "Game Over"}</h2>
+          <p>You used ${attempts} attempts in ${(timeTaken/1000).toFixed(3)}s.</p>
+          <p>Player: ${username}</p>
+          ${success ? showLeaderboard("guess","default",(a,b)=>a.score-b.score||a.timeTaken-b.timeTaken):""}
+          <button onclick="showMenu()">Back to Menu</button>
+        `;
+        if (success) saveLeaderboard("guess","default",{name:username,score:attempts,timeTaken},(a,b)=>a.score-b.score||a.timeTaken-b.timeTaken);
       }
-      // generate problem (plus, minus, multiply)
-      const a = Math.floor(Math.random()*12)+1; const b = Math.floor(Math.random()*12)+1;
-      const ops = ['+','-','*']; const op = ops[Math.floor(Math.random()*3)];
-      const ans = (op==='+') ? a+b : (op==='-') ? a-b : a*b;
-      qDiv.textContent = `Q${idx+1}: ${a} ${op} ${b} = ?`;
-      qDiv.dataset.ans = ans;
-      input.value = ''; feedback.textContent = '';
-    }
-    submit.onclick = ()=>{
-      const v = parseInt(input.value);
-      if(!isNaN(v) && v === Number(qDiv.dataset.ans)) correct++;
-      idx++;
-      document.getElementById('mathCorrect').textContent = correct;
-      newQ();
-    };
-    input.addEventListener('keydown', e=>{ if(e.key==='Enter') submit.click(); });
-    newQ();
-  }
-}
 
-/* ---------------------------
-   Reaction Game
-   - click only
-   - early click disqualifies -> no LB save
-   - sum of round times is used for leaderboard
-   ---------------------------*/
-function setupReactionPanel(playerName){
-  document.getElementById('reactionPlayer').textContent = playerName;
-  document.getElementById('reactionTotal').textContent = '0.000';
-  document.getElementById('reactionAchievements').innerHTML = '';
-  document.getElementById('lb-reaction').innerHTML = '';
-  const startBtn = document.getElementById('reactionStartBtn');
-  startBtn.onclick = ()=> startReactionRound();
-}
-
-function startReactionRound(){
-  const playerName = window.__playerName || 'Player';
-  const rounds = parseInt(document.getElementById('reactionRounds').value,10);
-  let roundIdx = 0;
-  let totalTime = 0;
-  let disqualified = false;
-  const area = document.getElementById('reactionArea');
-  area.style.background = '#333'; area.style.color = '#fff'; area.textContent = 'Wait... press when green';
-  document.getElementById('reactionTotal').textContent = '0.000';
-  document.getElementById('reactionAchievements').innerHTML = '';
-
-  let waitingForGreen = false;
-  let greenTime = 0;
-  let timerHandle = null;
-
-  // function to start one round
-  function startOne(){
-    roundIdx++;
-    waitingForGreen = true;
-    area.style.background = '#444';
-    area.textContent = `Round ${roundIdx}/${rounds} — Wait...`;
-    // random delay
-    const delay = Math.random()*2000 + 800;
-    // set up early-click behavior: if clicked before green => disqualify
-    function earlyClick(){
-      if(waitingForGreen){
-        disqualified = true;
-        cleanup();
-        area.style.background = '#600';
-        area.textContent = 'EARLY! Disqualified.';
-        document.getElementById('reactionAchievements').innerHTML = '<span class="achievement">❌ Early click — result not saved</span>';
-        setTimeout(()=> returnToMenu(), 2500);
-      }
-    }
-    area.onclick = earlyClick;
-    timerHandle = setTimeout(()=>{
-      // go green
-      waitingForGreen = false;
-      greenTime = now();
-      area.style.background = '#0a6';
-      area.textContent = 'CLICK!';
-      // now set click handler to capture reaction time
-      area.onclick = function(){
-        const t = now();
-        if(waitingForGreen) return;
-        const elapsed = msToSec(t - greenTime);
-        totalTime += elapsed;
-        area.style.background = '#333';
-        area.textContent = `Round ${roundIdx} : ${elapsed.toFixed(3)}s`;
-        if(roundIdx < rounds) { setTimeout(startOne, 700); }
-        else { finish(); }
+      window.checkGuess = function() {
+        let val = parseInt(document.getElementById("guessInput").value);
+        if (!val) return;
+        attempts++;
+        if (val === target) endGame(true);
+        else document.getElementById("feedback").innerText = val > target ? "Too high!" : "Too low!";
       };
-    }, delay);
-  }
 
-  function cleanup(){ if(timerHandle) { clearTimeout(timerHandle); timerHandle = null; } area.onclick = null; }
-
-  function finish(){
-    cleanup();
-    if(disqualified) return;
-    document.getElementById('reactionTotal').textContent = totalTime.toFixed(3);
-    // achievements
-    if(totalTime < rounds*0.35) document.getElementById('reactionAchievements').innerHTML = '<span class="achievement">⚡ Lightning Reflexes!</span>';
-    // save LB: lower time better
-    saveToLB('reaction', String(rounds), {name:playerName, score: totalTime, time: totalTime}, (a,b)=> a.time - b.time);
-    showLBIn('lb-reaction','reaction',String(rounds), e=> e.time.toFixed(3)+'s');
-    setTimeout(()=>returnToMenu(),3500);
-  }
-
-  startOne();
-}
-
-/* ---------------------------
-   Gibberish Typing
-   - words do NOT disappear
-   - Enter submits; must match exactly to be saved
-   ---------------------------*/
-function setupTypingPanel(playerName){
-  document.getElementById('typingPlayer').textContent = playerName;
-  document.getElementById('typingTime').textContent = '0.000';
-  document.getElementById('typingAchievements').innerHTML = '';
-  document.getElementById('lb-typing').innerHTML = '';
-  document.getElementById('typingInput').disabled = true;
-  document.getElementById('typingPlay').innerHTML = '';
-  document.getElementById('typingStartBtn').onclick = ()=> startTypingRun();
-}
-
-function startTypingRun(){
-  const playerName = window.__playerName || 'Player';
-  const n = parseInt(document.getElementById('typingCount').value,10);
-  const words = [];
-  for(let i=0;i<n;i++){
-    const len = 3 + Math.floor(Math.random()*5);
-    let w = '';
-    for(let j=0;j<len;j++) w += String.fromCharCode(97 + Math.floor(Math.random()*26));
-    words.push(w);
-  }
-  const line = words.join(' ');
-  const play = document.getElementById('typingPlay');
-  play.innerHTML = `<div style="background:#0b0c0d;padding:10px;border-radius:8px">${escapeHTML(line)}</div>`;
-  const input = document.getElementById('typingInput'); input.value=''; input.disabled=false; input.focus();
-  const t0 = now();
-  document.getElementById('typingAchievements').innerHTML = '';
-  function submit(){
-    const typed = input.value.trim();
-    input.disabled = true;
-    const elapsed = msToSec(now() - t0);
-    document.getElementById('typingTime').textContent = elapsed.toFixed(3);
-    if(typed === line){
-      document.getElementById('typingAchievements').innerHTML = '<span class="achievement">🏆 100% Accuracy!</span>';
-      saveToLB('typing', String(n), {name:playerName, score: elapsed, time: elapsed}, (a,b)=> a.time - b.time);
-      showLBIn('lb-typing','typing',String(n), e=> e.time.toFixed(3)+'s');
-    } else {
-      document.getElementById('typingAchievements').innerHTML = '<span class="achievement">❌ Incorrect — not saved</span>';
+      document.getElementById("guessInput").addEventListener("keydown", e => {
+        if (e.key === "Enter") checkGuess();
+      });
     }
-    setTimeout(()=>returnToMenu(), 2500);
-  }
-  input.onkeydown = function(e){ if(e.key === 'Enter') submit(); };
-}
 
-/* ---------------------------
-   Number Memory
-   - digits flash then hide
-   - user types back without spaces; exact match required
-   ---------------------------*/
-function setupNumMemoryPanel(playerName){
-  document.getElementById('numPlayer').textContent = playerName;
-  document.getElementById('numTime').textContent = '0.000';
-  document.getElementById('numAchievements').innerHTML = '';
-  document.getElementById('lb-numMemory').innerHTML = '';
-  document.getElementById('numStartBtn').onclick = ()=> startNumMemoryRun();
-}
+    // ---- Math Quiz ----
+    function startMath(username) {
+      let start = performance.now();
+      let correct = 0;
+      let total = 5;
+      let q = 0;
 
-function startNumMemoryRun(){
-  const playerName = window.__playerName || 'Player';
-  const len = parseInt(document.getElementById('numLength').value,10);
-  const seq = [];
-  for(let i=0;i<len;i++) seq.push(String(Math.floor(Math.random()*10)));
-  const play = document.getElementById('numPlay');
-  play.innerHTML = `<div style="font-size:20px;letter-spacing:8px">${seq.join(' ')}</div>`;
-  // show for displayMs ms then hide
-  const displayMs = Math.max(600, len * 450);
-  setTimeout(()=>{
-    play.innerHTML = '';
-    const input = document.createElement('input'); input.type='text'; input.placeholder='Type digits without spaces';
-    const btn = document.createElement('button'); btn.textContent='Submit';
-    const feedback = document.createElement('div');
-    play.appendChild(input); play.appendChild(btn); play.appendChild(feedback);
-    const t0 = now();
-    btn.onclick = ()=>{
-      if(btn.disabled) return;
-      const typed = (input.value || '').replace(/\s+/g,'');
-      const elapsed = msToSec(now()-t0);
-      document.getElementById('numTime').textContent = elapsed.toFixed(3);
-      if(typed === seq.join('')){
-        document.getElementById('numAchievements').innerHTML = '<span class="achievement">🏆 Perfect!</span>';
-        saveToLB('numMemory', String(len), {name:playerName, score: elapsed, time: elapsed}, (a,b)=> a.time - b.time);
-        showLBIn('lb-numMemory','numMemory',String(len), e=> e.time.toFixed(3)+'s');
-      } else {
-        document.getElementById('numAchievements').innerHTML = '<span class="achievement">❌ Incorrect — not saved</span>';
+      function ask() {
+        if (q >= total) return finish();
+        let a = Math.floor(Math.random()*10+1);
+        let b = Math.floor(Math.random()*10+1);
+        let ans = a+b;
+        document.getElementById("game").innerHTML = `
+          <h2>Math Quiz</h2>
+          <p>${a} + ${b} = ?</p>
+          <input id="mathInput" type="number">
+          <button onclick="submitMath(${ans})">Submit</button>
+        `;
+        document.getElementById("mathInput").addEventListener("keydown", e => {
+          if (e.key==="Enter") submitMath(ans);
+        });
       }
-      input.disabled = true; btn.disabled = true;
-      setTimeout(()=>returnToMenu(), 2500);
-    };
-    input.addEventListener('keydown', e=>{ if(e.key === 'Enter') btn.click(); });
-  }, displayMs);
-}
 
-/* ---------------------------
-   Sequence Tap (color sequences)
-   - show sequence by flashing color boxes
-   - then hide and present palette to click
-   - time measured while reproducing
-   - incorrect -> not saved
-   ---------------------------*/
-function setupSeqTapPanel(playerName){
-  document.getElementById('seqPlayer').textContent = playerName;
-  document.getElementById('seqTime').textContent = '0.000';
-  document.getElementById('seqAchievements').innerHTML = '';
-  document.getElementById('lb-seqTap').innerHTML = '';
-  document.getElementById('seqStartBtn').onclick = ()=> startSeqTapRun();
-}
+      window.submitMath = function(ans) {
+        let val = parseInt(document.getElementById("mathInput").value);
+        if (val === ans) correct++;
+        q++; ask();
+      };
 
-function startSeqTapRun(){
-  const playerName = window.__playerName || 'Player';
-  const len = parseInt(document.getElementById('seqLength').value,10);
-  const paletteColors = ['#e74c3c','#2ecc71','#3498db','#f1c40f','#9b59b6','#e67e22']; // 6 colors
-  const seq = [];
-  for(let i=0;i<len;i++) seq.push(paletteColors[Math.floor(Math.random()*paletteColors.length)]);
-  const play = document.getElementById('seqPlay');
-  play.innerHTML = '<div id="seqFlash" style="min-height:90px"></div>';
-  const flashDiv = document.getElementById('seqFlash');
+      function finish() {
+        let timeTaken = performance.now()-start;
+        document.getElementById("game").innerHTML = `
+          <h2>Math Quiz Finished</h2>
+          <p>${username}: ${correct}/${total} correct in ${(timeTaken/1000).toFixed(3)}s</p>
+          ${correct===total?showLeaderboard("math","default",(a,b)=>a.timeTaken-b.timeTaken):""}
+          <button onclick="showMenu()">Back to Menu</button>
+        `;
+        if (correct===total) saveLeaderboard("math","default",{name:username,score:correct,timeTaken},(a,b)=>a.timeTaken-b.timeTaken);
+      }
 
-  // Flash each color sequentially
-  let idx = 0;
-  function flashNext(){
-    flashDiv.innerHTML = '';
-    if(idx >= seq.length){
-      // done flashing --> show palette and allow clicks
-      showPalette();
-      return;
+      ask();
     }
-    const box = document.createElement('div');
-    box.style.width = '80px'; box.style.height = '80px'; box.style.background = seq[idx];
-    box.style.margin = '6px auto'; box.style.borderRadius = '10px';
-    flashDiv.appendChild(box);
-    setTimeout(()=>{ idx++; flashNext(); }, 600);
-  }
-  function showPalette(){
-    flashDiv.innerHTML = '<div style="margin-bottom:8px">Now reproduce the sequence by clicking the colors</div>';
-    const palette = document.createElement('div');
-    palette.style.textAlign = 'center';
-    palette.id = 'seqPalette';
-    palette.style.marginTop = '6px';
-    palette.style.marginBottom = '8px';
-    palette.style.userSelect = 'none';
-    palette.style.display = 'block';
-    // shuffle but show all colors
-    paletteColors.forEach(c=>{
-      const btn = document.createElement('div');
-      btn.className = 'color-btn';
-      btn.style.background = c;
-      btn.style.display = 'inline-block';
-      btn.onclick = ()=> handleColorClick(c);
-      palette.appendChild(btn);
-    });
-    flashDiv.appendChild(palette);
-    // start timer now
-    const t0 = now();
-    let pos = 0;
-    function handleColorClick(col){
-      if(pos >= seq.length) return;
-      if(col !== seq[pos]){
-        document.getElementById('seqAchievements').innerHTML = '<span class="achievement">❌ Wrong — not saved</span>';
-        // disable palette
-        Array.from(palette.children).forEach(n=>n.onclick = null);
-        setTimeout(()=>returnToMenu(), 2000);
-        return;
-      }
-      pos++;
-      if(pos >= seq.length){
-        const elapsed = msToSec(now() - t0);
-        document.getElementById('seqTime').textContent = elapsed.toFixed(3);
-        if(elapsed < len*0.4) document.getElementById('seqAchievements').innerHTML = '<span class="achievement">⚡ Lightning Sequence!</span>';
-        saveToLB('seqTap', String(len), {name:playerName, score: elapsed, time: elapsed}, (a,b)=> a.time - b.time);
-        showLBIn('lb-seqTap','seqTap',String(len), e=> e.time.toFixed(3)+'s');
-        Array.from(palette.children).forEach(n=>n.onclick = null);
-        setTimeout(()=>returnToMenu(), 2200);
+
+    // ---- Reaction Test ----
+    function startReaction(username) {
+      const gameDiv = document.getElementById("game");
+      gameDiv.innerHTML = `<p>Wait for green...</p>`;
+      let startTime, clickedEarly=false;
+      setTimeout(() => {
+        gameDiv.innerHTML = `<button id="clickBtn" style="font-size:20px;">CLICK!</button>`;
+        startTime = performance.now();
+        document.getElementById("clickBtn").onclick = () => {
+          const reaction = performance.now()-startTime;
+          end(reaction);
+        };
+      }, Math.random()*3000+2000);
+
+      gameDiv.onclick = () => { if (!startTime) clickedEarly=true; };
+
+      function end(time) {
+        gameDiv.innerHTML = `
+          <p>${username}, your reaction time: ${time.toFixed(3)} ms</p>
+          ${!clickedEarly?showLeaderboard("reaction","default",(a,b)=>a.timeTaken-b.timeTaken):"<p>(Too early, not on leaderboard)</p>"}
+          <button onclick="showMenu()">Back to Menu</button>
+        `;
+        if (!clickedEarly) saveLeaderboard("reaction","default",{name:username,score:time,timeTaken:time},(a,b)=>a.timeTaken-b.timeTaken);
       }
     }
-  }
-  flashNext();
-}
 
-/* ---------------------------
-   Word Memory Chain
-   - show words from a word bank, hide, user types back
-   - correct => saved
-   ---------------------------*/
-const WORD_BANK = [
-  'apple','orange','banana','grape','peach','melon','kiwi','mango','pear','plum',
-  'lemon','lime','apricot','berry','cherry','date','fig','guava','papaya','quince',
-  'raisin','tamarind','vanilla','walnut','yam','zucchini','coconut','nectarine',
-  'olive','radish','spinach','kale','onion','pepper','tomato','garlic','potato','broccoli',
-  'carrot','celery','lettuce','mushroom','cabbage','pumpkin','ginger','herb','basil','rosemary'
-];
+    // ---- Gibberish Typing ----
+    function startTyping(username) {
+      let words = Array.from({length:20},()=>Math.random().toString(36).substring(2,7));
+      let text = words.join(" ");
+      let start = performance.now();
+      document.getElementById("game").innerHTML = `
+        <h2>Typing Test</h2>
+        <p>${text}</p>
+        <textarea id="typeBox" rows="3" cols="40"></textarea><br>
+        <button onclick="endTyping()">Submit</button>
+      `;
+      window.endTyping = function() {
+        let typed = document.getElementById("typeBox").value.trim();
+        let timeTaken = performance.now()-start;
+        let correct = typed===text;
+        document.getElementById("game").innerHTML = `
+          <h2>Typing Finished</h2>
+          <p>${username}: ${(timeTaken/1000).toFixed(3)}s — ${correct?"100% Accuracy ✅":"❌ Wrong"}</p>
+          ${correct?showLeaderboard("typing","default",(a,b)=>a.timeTaken-b.timeTaken):""}
+          <button onclick="showMenu()">Back to Menu</button>
+        `;
+        if (correct) saveLeaderboard("typing","default",{name:username,score:timeTaken,timeTaken},(a,b)=>a.timeTaken-b.timeTaken);
+      };
+    }
 
-function setupWordChainPanel(playerName){
-  document.getElementById('wordPlayer').textContent = playerName;
-  document.getElementById('wordTime').textContent = '0.000';
-  document.getElementById('wordAchievements').innerHTML = '';
-  document.getElementById('lb-wordChain').innerHTML = '';
-  document.getElementById('wordStartBtn').onclick = ()=> startWordChainRun();
-}
+    // ---- Number Memory ----
+    function startNumberMemory(username) {
+      let num = Math.floor(Math.random()*90000)+10000;
+      document.getElementById("game").innerHTML = `<h2>Memorize: ${num}</h2>`;
+      setTimeout(()=> {
+        document.getElementById("game").innerHTML=`
+          <p>Enter the number:</p>
+          <input id="nmInput" type="text">
+          <button onclick="endNM()">Submit</button>
+        `;
+        document.getElementById("nmInput").addEventListener("keydown", e=>{
+          if (e.key==="Enter") endNM();
+        });
+      },2000);
+      const start=performance.now();
+      window.endNM=function(){
+        let val=document.getElementById("nmInput").value.trim();
+        let timeTaken=performance.now()-start;
+        let correct=val==num;
+        document.getElementById("game").innerHTML=`
+          <h2>Number Memory</h2>
+          <p>${username}: ${correct?"Correct":"Wrong"} in ${(timeTaken/1000).toFixed(3)}s</p>
+          ${correct?showLeaderboard("numberMemory","default",(a,b)=>a.timeTaken-b.timeTaken):""}
+          <button onclick="showMenu()">Back to Menu</button>
+        `;
+        if (correct) saveLeaderboard("numberMemory","default",{name:username,score:timeTaken,timeTaken},(a,b)=>a.timeTaken-b.timeTaken);
+      };
+    }
 
-function startWordChainRun(){
-  const playerName = window.__playerName || 'Player';
-  const len = parseInt(document.getElementById('wordLength').value,10);
-  const seq = [];
-  for(let i=0;i<len;i++) seq.push(WORD_BANK[Math.floor(Math.random()*WORD_BANK.length)]);
-  const play = document.getElementById('wordPlay');
-  play.innerHTML = `<div style="font-size:18px; padding:8px; background:#0b0c0d; border-radius:8px">${escapeHTML(seq.join(' '))}</div>`;
-  // show then hide
-  const displayMs = Math.max(1000, len * 600);
-  setTimeout(()=>{
-    play.innerHTML = '';
-    const input = document.getElementById('wordInput');
-    input.disabled = false; input.value = ''; input.focus();
-    const submitBtn = document.createElement('button'); submitBtn.textContent = 'Submit'; play.appendChild(submitBtn);
-    const t0 = now();
-    submitBtn.onclick = ()=>{
-      submitBtn.disabled = true; input.disabled = true;
-      const typed = (input.value || '').trim().split(/\s+/);
-      const elapsed = msToSec(now() - t0);
-      document.getElementById('wordTime').textContent = elapsed.toFixed(3);
-      let ok = typed.length === seq.length;
-      if(ok){
-        for(let i=0;i<seq.length;i++){ if(typed[i] !== seq[i]) { ok = false; break; } }
+    // ---- Sequence Tap (colors) ----
+    function startSequenceTap(username) {
+      let colors=["red","green","blue","yellow"];
+      let seq=[colors[Math.floor(Math.random()*4)]];
+      let userSeq=[];
+      const start=performance.now();
+      function showSeq(){
+        let html="<h2>Sequence Tap</h2><p>Watch...</p>";
+        document.getElementById("game").innerHTML=html;
+        let i=0;
+        let interval=setInterval(()=>{
+          document.getElementById("game").innerHTML=`<h2 style="color:${seq[i]}">${seq[i]}</h2>`;
+          i++;
+          if(i>=seq.length){clearInterval(interval); setTimeout(()=>askInput(),500);}
+        },1000);
       }
-      if(ok){
-        document.getElementById('wordAchievements').innerHTML = '<span class="achievement">🏆 Correct!</span>';
-        saveToLB('wordChain', String(len), {name:playerName, score: elapsed, time: elapsed}, (a,b)=> a.time - b.time);
-        showLBIn('lb-wordChain','wordChain',String(len), e=> e.time.toFixed(3)+'s');
-      } else {
-        document.getElementById('wordAchievements').innerHTML = '<span class="achievement">❌ Incorrect — not saved</span>';
+      function askInput(){
+        document.getElementById("game").innerHTML=`
+          <h2>Repeat Sequence</h2>
+          ${colors.map(c=>`<button onclick="tap('${c}')">${c}</button>`).join("")}
+        `;
       }
-      setTimeout(()=>returnToMenu(), 2200);
-    };
-    input.addEventListener('keydown', e=>{ if(e.key==='Enter') submitBtn.click(); });
-  }, displayMs);
-}
+      window.tap=function(c){
+        userSeq.push(c);
+        if(userSeq[userSeq.length-1]!==seq[userSeq.length-1]) return end(false);
+        if(userSeq.length===seq.length) return end(true);
+      };
+      function end(correct){
+        let timeTaken=performance.now()-start;
+        document.getElementById("game").innerHTML=`
+          <h2>Sequence Tap</h2>
+          <p>${username}: ${correct?"Correct":"Wrong"} in ${(timeTaken/1000).toFixed(3)}s</p>
+          ${correct?showLeaderboard("sequenceTap","default",(a,b)=>a.timeTaken-b.timeTaken):""}
+          <button onclick="showMenu()">Back to Menu</button>
+        `;
+        if(correct) saveLeaderboard("sequenceTap","default",{name:username,score:timeTaken,timeTaken},(a,b)=>a.timeTaken-b.timeTaken);
+      }
+      showSeq();
+    }
 
-/* ---------------------------
-   Wiring setup: attach per-panel setups so Start buttons work after username
-   ---------------------------*/
-document.getElementById('guessStartBtn').addEventListener('click', ()=> {
-  // If username was set by enterGame() startGuess was already wired
-  // For safety, do nothing here.
-});
-document.getElementById('mathStartBtn').addEventListener('click', ()=> {});
-document.getElementById('reactionStartBtn').addEventListener('click', ()=> {});
-document.getElementById('typingStartBtn').addEventListener('click', ()=> {});
-document.getElementById('numStartBtn').addEventListener('click', ()=> {});
-document.getElementById('seqStartBtn').addEventListener('click', ()=> {});
-document.getElementById('wordStartBtn').addEventListener('click', ()=> {});
+    // ---- Word Memory Chain ----
+    function startWordMemory(username) {
+      let words=["apple","dog","car","house","tree","water","sky","book"];
+      let chain=Array.from({length:4},()=>words[Math.floor(Math.random()*words.length)]);
+      document.getElementById("game").innerHTML=`<h2>Memorize: ${chain.join(" ")}</h2>`;
+      setTimeout(()=>{
+        document.getElementById("game").innerHTML=`
+          <p>Enter words in order:</p>
+          <input id="wmInput" type="text">
+          <button onclick="endWM()">Submit</button>
+        `;
+        document.getElementById("wmInput").addEventListener("keydown",e=>{
+          if(e.key==="Enter") endWM();
+        });
+      },3000);
+      const start=performance.now();
+      window.endWM=function(){
+        let val=document.getElementById("wmInput").value.trim().split(" ");
+        let timeTaken=performance.now()-start;
+        let correct=JSON.stringify(val)===JSON.stringify(chain);
+        document.getElementById("game").innerHTML=`
+          <h2>Word Memory Chain</h2>
+          <p>${username}: ${correct?"Correct":"Wrong"} in ${(timeTaken/1000).toFixed(3)}s</p>
+          ${correct?showLeaderboard("wordMemory","default",(a,b)=>a.timeTaken-b.timeTaken):""}
+          <button onclick="showMenu()">Back to Menu</button>
+        `;
+        if(correct) saveLeaderboard("wordMemory","default",{name:username,score:timeTaken,timeTaken},(a,b)=>a.timeTaken-b.timeTaken);
+      };
+    }
 
-/* ---------------------------
-   Small initialization: when panels are shown by enterGame the start handlers are set up in enterGame.
-   But we must ensure each panel calls its setup function once the username is provided.
-   When enterGame created the name field and pressed Start, we call appropriate setupXPanel functions.
-   To make the UI responsive, the setup functions above register the Start button events.
-   So when user presses 'Start' after entering name, setupXPanel is called which wires the Start buttons.
-   ---------------------------*/
-
-/* Note: All leaderboards stored by (game,mode) keys using saveToLB comparator logic above. */
-/* Done. Enjoy. */
-</script>
+    showMenu();
+  </script>
 </body>
 </html>
+
