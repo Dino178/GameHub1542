@@ -1,926 +1,317 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Ultimate Game Hub — All Games</title>
-<style>
-:root{
-  --bg:#0b0c0e; --panel:#111214; --muted:#9aa0a6; --accent:#ffd166;
-  --card:#141518; --ok:#2ecc71; --bad:#e74c3c;
-}
-body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:#e7eef6}
-header{background:var(--panel);padding:18px 24px;text-align:center}
-header h1{margin:0;color:var(--accent)}
-main{max-width:1100px;margin:18px auto;padding:18px}
-.menu, .panel{background:var(--card);padding:16px;border-radius:10px;margin-bottom:14px}
-button{background:#1f2226;color:#fff;border:0;padding:8px 12px;border-radius:8px;margin:6px;cursor:pointer}
-select,input,textarea{padding:8px;border-radius:8px;border:1px solid #222;background:#0e0f11;color:#fff}
-label{color:var(--muted);margin-right:10px}
-.controls{margin:8px 0}
-.small{font-size:13px;color:var(--muted)}
-.leaderboard{background:#0e1012;padding:10px;border-radius:8px;margin-top:12px;max-height:260px;overflow:auto;text-align:left}
-.resultline{margin-top:8px;color:var(--muted)}
-.achievement{color:var(--accent);font-weight:700;margin-top:6px;display:block}
-#reactionArea{width:340px;height:140px;margin:14px auto;border-radius:10px;display:flex;align-items:center;justify-content:center;user-select:none;cursor:pointer}
-.color-btn{width:64px;height:64px;border-radius:8px;display:inline-block;margin:6px;border:3px solid rgba(255,255,255,0.06);cursor:pointer}
-.hidden{display:none}
-.inline{display:inline-block}
-.game-title{margin:0 0 8px 0}
-ol{margin:8px 0 0 18px;padding:0}
-kbd{background:#222;padding:2px 6px;border-radius:4px}
-.badge{background:#222;padding:4px 8px;border-radius:6px}
-.smallmuted{color:var(--muted);font-size:13px}
-</style>
+  <meta charset="UTF-8">
+  <title>Arcade Games</title>
+  <style>
+    body { background: black; color: white; font-family: Arial, sans-serif; text-align: center; }
+    .screen { display: none; }
+    .active { display: block; }
+    button { margin: 10px; padding: 10px 20px; font-size: 18px; cursor: pointer; }
+    #leaderboard { margin-top: 20px; }
+    table { margin: auto; border-collapse: collapse; width: 60%; }
+    th, td { border: 1px solid white; padding: 8px; }
+  </style>
 </head>
 <body>
-<header><h1>Ultimate Game Hub</h1></header>
-<main>
-  <section class="menu" id="mainMenu">
-    <h2 class="game-title">Games</h2>
-    <div class="controls">
-      <button onclick="enterGame('guess')">Guess the Number</button>
-      <button onclick="enterGame('math')">Math Quiz</button>
-      <button onclick="enterGame('reaction')">Reaction Game</button>
-      <button onclick="enterGame('typing')">Gibberish Typing</button>
-      <button onclick="enterGame('numMemory')">Number Memory</button>
-      <button onclick="enterGame('seqTap')">Sequence Tap</button>
-      <button onclick="enterGame('wordChain')">Word Memory Chain</button>
-    </div>
-    <div class="small">Leaderboards are global (Firestore). You will be asked for your username after selecting a game; returning to menu forgets it (session-style).</div>
-  </section>
+  <h1>🎮 Arcade Games 🎮</h1>
 
-  <!-- GUESS -->
-  <section class="panel hidden" id="panel-guess">
-    <h2 class="game-title">Guess the Number</h2>
-    <div class="controls">
-      <label>Difficulty:
-        <select id="guessMode">
-          <option value="Easy">Easy (1–50)</option>
-          <option value="Normal" selected>Normal (1–100)</option>
-          <option value="Hard">Hard (1–250)</option>
-          <option value="Nightmare">Nightmare (1–500)</option>
-        </select>
-      </label>
-      <span id="guessNameArea"></span>
-    </div>
+  <!-- Main Menu -->
+  <div id="menu" class="screen active">
+    <h2>Main Menu</h2>
+    <button onclick="pickDifficulty('reaction')">Reaction Test</button>
+    <button onclick="pickDifficulty('guess')">Guess the Number</button>
+    <button onclick="pickDifficulty('math')">Math Quiz</button>
+    <button onclick="pickDifficulty('gibberish')">Gibberish Typing</button>
+    <button onclick="pickDifficulty('numberMemory')">Number Memory</button>
+    <button onclick="pickDifficulty('sequenceTap')">Sequence Tap</button>
+    <button onclick="pickDifficulty('wordMemory')">Word Memory Chain</button>
+  </div>
 
-    <div id="guessPlayArea" style="margin-top:12px">
-      <div id="guessPrompt">Press Start after entering name</div>
-      <input id="guessInput" type="number" placeholder="Enter guess" style="margin-top:8px" />
-      <button id="guessSubmitBtn">Submit Guess</button>
-    </div>
+  <!-- Difficulty Screen -->
+  <div id="difficultyScreen" class="screen">
+    <h2>Select Difficulty</h2>
+    <button onclick="setDifficulty('easy')">Easy</button>
+    <button onclick="setDifficulty('medium')">Medium</button>
+    <button onclick="setDifficulty('hard')">Hard</button>
+  </div>
 
-    <div class="resultline">Player: <b id="guessPlayer"></b> — Attempts: <b id="guessAttempts">0</b> — Time: <b id="guessTime">0.000</b>s</div>
-    <div id="guessAchievements"></div>
-    <div class="leaderboard" id="lb-guess"></div>
+  <!-- Username Screen -->
+  <div id="usernameScreen" class="screen">
+    <h2>Enter Your Username</h2>
+    <input type="text" id="usernameInput" placeholder="Your name">
+    <br><br>
+    <button onclick="confirmUsername()">Continue</button>
+  </div>
 
-    <div style="margin-top:10px"><button onclick="returnToMenu()">Return to Menu</button></div>
-  </section>
+  <!-- Game Screen -->
+  <div id="gameScreen" class="screen">
+    <h2 id="gameTitle"></h2>
+    <div id="gameArea"></div>
+    <br>
+    <button onclick="backToMenu()">Back to Menu</button>
+  </div>
 
-  <!-- MATH -->
-  <section class="panel hidden" id="panel-math">
-    <h2 class="game-title">Math Quiz</h2>
-    <div class="controls">
-      <label>Difficulty:
-        <select id="mathMode">
-          <option value="Easy">Easy (small +,-)</option>
-          <option value="Normal" selected>Normal (+,-,×)</option>
-          <option value="Hard">Hard (+,-,×,÷)</option>
-          <option value="Nightmare">Nightmare (multi-step & 3-digit)</option>
-        </select>
-      </label>
-      <span id="mathNameArea"></span>
-    </div>
+  <!-- Leaderboard -->
+  <div id="leaderboard" class="screen">
+    <h2 id="leaderboardTitle">Leaderboard</h2>
+    <table>
+      <thead>
+        <tr><th>Rank</th><th>Player</th><th>Score/Time</th></tr>
+      </thead>
+      <tbody id="leaderboardBody"></tbody>
+    </table>
+    <br>
+    <button onclick="backToMenu()">Back to Menu</button>
+  </div>
 
-    <div id="mathPlayArea" style="margin-top:12px">
-      <div id="mathQuestion">Press Start after entering name</div>
-      <input id="mathAnswer" type="text" placeholder="Answer" />
-      <button id="mathSubmitBtn">Submit</button>
-    </div>
+  <!-- Firebase + JS -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    <div class="resultline">Player: <b id="mathPlayer"></b> — Correct: <b id="mathCorrect">0</b> — Time: <b id="mathTime">0.000</b>s</div>
-    <div id="mathAchievements"></div>
-    <div class="leaderboard" id="lb-math"></div>
-
-    <div style="margin-top:10px"><button onclick="returnToMenu()">Return to Menu</button></div>
-  </section>
-
-  <!-- REACTION -->
-  <section class="panel hidden" id="panel-reaction">
-    <h2 class="game-title">Reaction Game (click-only)</h2>
-    <div class="controls">
-      <label>Difficulty / Rounds:
-        <select id="reactionMode">
-          <option value="3">3 rounds</option>
-          <option value="5" selected>5 rounds</option>
-          <option value="10">10 rounds</option>
-          <option value="2">2 rounds</option>
-          <option value="7">7 rounds</option>
-          <option value="15">15 rounds</option>
-          <option value="25">25 rounds</option>
-        </select>
-      </label>
-      <span id="reactionNameArea"></span>
-    </div>
-
-    <div id="reactionPlay" style="margin-top:12px">
-      <div id="reactionArea" style="background:#333;color:#fff;border-radius:8px;padding:12px;text-align:center">Press Start</div>
-      <div style="margin-top:8px"><button id="reactionStartBtn">Start Round(s)</button></div>
-    </div>
-
-    <div class="resultline">Player: <b id="reactionPlayer"></b> — Total Time: <b id="reactionTotal">0.000</b>s</div>
-    <div id="reactionAchievements"></div>
-    <div class="leaderboard" id="lb-reaction"></div>
-
-    <div style="margin-top:10px"><button onclick="returnToMenu()">Return to Menu</button></div>
-  </section>
-
-  <!-- TYPING -->
-  <section class="panel hidden" id="panel-typing">
-    <h2 class="game-title">Gibberish Typing</h2>
-    <div class="controls">
-      <label>Mode:
-        <select id="typingMode">
-          <option value="5">5 words</option>
-          <option value="10" selected>10 words</option>
-          <option value="15">15 words</option>
-          <option value="20">20 words</option>
-          <option value="25">25 words</option>
-          <option value="30">30 words</option>
-          <option value="35">35 words</option>
-          <option value="40">40 words</option>
-        </select>
-      </label>
-      <span id="typingNameArea"></span>
-    </div>
-
-    <div id="typingPlay" style="margin-top:12px"></div>
-    <input id="typingInput" type="text" placeholder="Type exact gibberish and press Enter" style="width:96%;margin-top:8px;padding:8px" disabled />
-    <div class="resultline">Player: <b id="typingPlayer"></b> — Time: <b id="typingTime">0.000</b>s</div>
-    <div id="typingAchievements"></div>
-    <div class="leaderboard" id="lb-typing"></div>
-
-    <div style="margin-top:10px"><button onclick="returnToMenu()">Return to Menu</button></div>
-  </section>
-
-  <!-- NUMBER MEMORY -->
-  <section class="panel hidden" id="panel-numMemory">
-    <h2 class="game-title">Number Memory</h2>
-    <div class="controls">
-      <label>Mode:
-        <select id="numMode">
-          <option value="3">3 digits</option>
-          <option value="5" selected>5 digits</option>
-          <option value="7">7 digits</option>
-          <option value="10">10 digits</option>
-        </select>
-      </label>
-      <span id="numNameArea"></span>
-    </div>
-
-    <div id="numPlay" style="margin-top:12px"></div>
-    <div class="resultline">Player: <b id="numPlayer"></b> — Time: <b id="numTime">0.000</b>s</div>
-    <div id="numAchievements"></div>
-    <div class="leaderboard" id="lb-numMemory"></div>
-
-    <div style="margin-top:10px"><button onclick="returnToMenu()">Return to Menu</button></div>
-  </section>
-
-  <!-- SEQUENCE TAP -->
-  <section class="panel hidden" id="panel-seqTap">
-    <h2 class="game-title">Sequence Tap (colors)</h2>
-    <div class="controls">
-      <label>Mode:
-        <select id="seqMode">
-          <option value="3">3</option>
-          <option value="5" selected>5</option>
-          <option value="7">7</option>
-          <option value="10">10</option>
-        </select>
-      </label>
-      <span id="seqNameArea"></span>
-    </div>
-
-    <div id="seqPlay" style="margin-top:12px"></div>
-    <div class="resultline">Player: <b id="seqPlayer"></b> — Time: <b id="seqTime">0.000</b>s</div>
-    <div id="seqAchievements"></div>
-    <div class="leaderboard" id="lb-seqTap"></div>
-
-    <div style="margin-top:10px"><button onclick="returnToMenu()">Return to Menu</button></div>
-  </section>
-
-  <!-- WORD CHAIN -->
-  <section class="panel hidden" id="panel-wordChain">
-    <h2 class="game-title">Word Memory Chain</h2>
-    <div class="controls">
-      <label>Mode:
-        <select id="wordMode">
-          <option value="3">3 words</option>
-          <option value="5">5 words</option>
-          <option value="7" selected>7 words</option>
-          <option value="10">10 words</option>
-        </select>
-      </label>
-      <span id="wordNameArea"></span>
-    </div>
-
-    <div id="wordPlay" style="margin-top:12px"></div>
-    <input id="wordInput" type="text" placeholder="Type words separated by spaces" style="width:96%;padding:8px;margin-top:8px" disabled />
-    <div class="resultline">Player: <b id="wordPlayer"></b> — Time: <b id="wordTime">0.000</b>s</div>
-    <div id="wordAchievements"></div>
-    <div class="leaderboard" id="lb-wordChain"></div>
-
-    <div style="margin-top:10px"><button onclick="returnToMenu()">Return to Menu</button></div>
-  </section>
-
-</main>
-
-<!-- Firebase and full game logic -->
-<script type="module">
-/* ----------------------------
-   Firebase Initialization
-   (Your snippet provided earlier is used)
-   ----------------------------*/
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.6.1/firebase-firestore.js";
-
-// Your Firebase config (from your snippet)
-const firebaseConfig = {
-  apiKey: "AIzaSyBrY0AdHrWI0FdCdhJuTHb43E4HHsJ-2FQ",
-  authDomain: "arcade-games-1e219.firebaseapp.com",
-  projectId: "arcade-games-1e219",
-  storageBucket: "arcade-games-1e219.appspot.com",
-  messagingSenderId: "790089373336",
-  appId: "1:790089373336:web:aea31e89728f14bc67e2ed"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-/* ----------------------------
-   Utilities
-   ----------------------------*/
-function hideAllPanels(){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.add('hidden'));
-}
-function returnToMenu(){
-  // forget username for this session (as requested)
-  window.__playerName = '';
-  hideAllPanels();
-  document.getElementById('mainMenu').style.display = 'block';
-  // clear dynamic play areas to prevent spamming
-  document.querySelectorAll('[id$="Play"], [id$="PlayArea"]').forEach(n=>{ if(n) n.innerHTML=''; });
-}
-function escapeHTML(s){ return String(s).replace(/[&<>"]/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-
-// Generate-or-get session id to help prevent duplicates / identify user client
-function getSessionId(){
-  let id = localStorage.getItem('arcade_session_id');
-  if(!id){
-    id = 'sess_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
-    localStorage.setItem('arcade_session_id', id);
-  }
-  return id;
-}
-const SESSION_ID = getSessionId();
-
-// Write to Firestore: we use collection name game__mode (e.g., guess__Normal)
-async function writeScoreToFirestore(game, mode, doc){
-  const collName = `${game}__${mode}`; // matches the Firestore rules pattern you used
-  try{
-    await addDoc(collection(db, collName), doc);
-  }catch(err){
-    console.error('Failed to write score', err);
-  }
-}
-
-// Read all scores for a game-mode collection; client will sort per-game rules
-async function readScoresFromFirestore(game, mode){
-  const collName = `${game}__${mode}`;
-  try{
-    const snap = await getDocs(collection(db, collName));
-    const arr = [];
-    snap.forEach(d => arr.push(Object.assign({ id: d.id }, d.data())));
-    return arr;
-  }catch(err){
-    console.error('Failed to read scores', err);
-    return [];
-  }
-}
-
-/* ----------------------------
-   Leaderboard display helpers
-   Each game has different sorting rules; we perform client-side sorting after fetching all documents (safe for top-100).
-   ----------------------------*/
-
-// Guess: sort by attempts ascending, time ascending
-async function showGuessLB(mode){
-  const raw = await readScoresFromFirestore('guess', mode);
-  raw.sort((a,b)=>{
-    if(a.attempts !== b.attempts) return a.attempts - b.attempts;
-    return (a.time || 0) - (b.time || 0);
-  });
-  displayLB('lb-guess', raw, e => `${escapeHTML(e.name)} — Attempts: ${e.attempts} — ${ (e.time||0).toFixed(3)}s`);
-}
-
-// Math: sort by correct descending, tiebreaker time ascending
-async function showMathLB(mode){
-  const raw = await readScoresFromFirestore('math', mode);
-  raw.sort((a,b)=>{
-    if((b.correct||0) !== (a.correct||0)) return (b.correct||0) - (a.correct||0);
-    return (a.time||0) - (b.time||0);
-  });
-  displayLB('lb-math', raw, e => `${escapeHTML(e.name)} — Correct: ${e.correct||0} — ${ (e.time||0).toFixed(3)}s`);
-}
-
-// Reaction: lower totalTime better
-async function showReactionLB(mode){
-  const raw = await readScoresFromFirestore('reaction', mode);
-  raw.sort((a,b)=> (a.totalTime||0) - (b.totalTime||0));
-  displayLB('lb-reaction', raw, e => `${escapeHTML(e.name)} — Total: ${ (e.totalTime||0).toFixed(3)}s`);
-}
-
-// Typing: faster time is better; only saved when 100% accuracy
-async function showTypingLB(mode){
-  const raw = await readScoresFromFirestore('typing', mode);
-  raw.sort((a,b)=> (a.time||Infinity) - (b.time||Infinity));
-  displayLB('lb-typing', raw, e => `${escapeHTML(e.name)} — Time: ${ (e.time||0).toFixed(3)}s`);
-}
-
-// Number Memory: faster time better or larger length? We'll save successful times; sort by time ascending
-async function showNumMemoryLB(mode){
-  const raw = await readScoresFromFirestore('numMemory', mode);
-  raw.sort((a,b)=> (a.time||Infinity) - (b.time||Infinity));
-  displayLB('lb-numMemory', raw, e => `${escapeHTML(e.name)} — Time: ${ (e.time||0).toFixed(3)}s — Length: ${e.length||0}`);
-}
-
-// Sequence Tap: higher length/score better, tiebreaker time ascending
-async function showSeqTapLB(mode){
-  const raw = await readScoresFromFirestore('seqTap', mode);
-  raw.sort((a,b)=>{
-    if((b.score||0) !== (a.score||0)) return (b.score||0) - (a.score||0);
-    return (a.time||0) - (b.time||0);
-  });
-  displayLB('lb-seqTap', raw, e => `${escapeHTML(e.name)} — Score: ${e.score||0} — ${ (e.time||0).toFixed(3)}s`);
-}
-
-// Word Chain: higher length better, tiebreaker time ascending
-async function showWordChainLB(mode){
-  const raw = await readScoresFromFirestore('wordChain', mode);
-  raw.sort((a,b)=>{
-    if((b.score||0) !== (a.score||0)) return (b.score||0) - (a.score||0);
-    return (a.time||0) - (b.time||0);
-  });
-  displayLB('lb-wordChain', raw, e => `${escapeHTML(e.name)} — Score: ${e.score||0} — ${ (e.time||0).toFixed(3)}s`);
-}
-
-// generic renderer: only top 100
-function displayLB(containerId, arr, fmt){
-  const c = document.getElementById(containerId);
-  if(!arr || arr.length === 0){ c.innerHTML = '<i>No scores yet for this mode.</i>'; return; }
-  const top = arr.slice(0, 100);
-  let html = `<b>Top ${top.length}</b><ol>`;
-  top.forEach((e,i)=> html += `<li>${fmt(e)}</li>`);
-  html += '</ol>';
-  c.innerHTML = html;
-}
-
-/* ----------------------------
-   UI navigation: ask for username AFTER selecting a game
-   ----------------------------*/
-function enterGame(key){
-  hideAllPanels();
-  document.getElementById('mainMenu').style.display = 'none';
-  const panel = document.getElementById('panel-' + key);
-  if(!panel) return;
-  panel.classList.remove('hidden');
-
-  // show username input inside the panel (per-game)
-  const nameAreaId = {
-    guess:'guessNameArea', math:'mathNameArea', reaction:'reactionNameArea',
-    typing:'typingNameArea', numMemory:'numNameArea', seqTap:'seqNameArea', wordChain:'wordNameArea'
-  }[key];
-  const nameArea = document.getElementById(nameAreaId);
-  nameArea.innerHTML = '';
-  const inp = document.createElement('input'); inp.placeholder = 'Your name';
-  const startBtn = document.createElement('button'); startBtn.textContent = 'Start';
-  nameArea.appendChild(inp); nameArea.appendChild(startBtn);
-
-  startBtn.onclick = ()=>{
-    const name = (inp.value || '').trim() || prompt('Enter your name', 'Player') || 'Player';
-    window.__playerName = name;
-    nameArea.innerHTML = '<b>Player: </b>' + escapeHTML(name) + ' ';
-    // wire game setup for selected panel
-    if(key === 'guess') setupGuess(name);
-    else if(key === 'math') setupMath(name);
-    else if(key === 'reaction') setupReaction(name);
-    else if(key === 'typing') setupTyping(name);
-    else if(key === 'numMemory') setupNumMemory(name);
-    else if(key === 'seqTap') setupSeqTap(name);
-    else if(key === 'wordChain') setupWordChain(name);
-  };
-  inp.addEventListener('keydown', e=>{ if(e.key==='Enter') startBtn.click(); });
-}
-
-/* ----------------------------
-   GAME: Guess the Number
-   - ranks by attempts (asc); tiebreaker time (asc)
-   - displays player run even if not on LB
-   ----------------------------*/
-function setupGuess(playerName){
-  const mode = document.getElementById('guessMode').value;
-  const promptDiv = document.getElementById('guessPrompt');
-  const inputEl = document.getElementById('guessInput');
-  const btn = document.getElementById('guessSubmitBtn');
-  document.getElementById('guessPlayer').textContent = playerName;
-  document.getElementById('guessAttempts').textContent = '0';
-  document.getElementById('guessTime').textContent = '0.000';
-  document.getElementById('guessAchievements').innerHTML = '';
-
-  // difficulty ranges
-  const ranges = { 'Easy':[1,50], 'Normal':[1,100], 'Hard':[1,250], 'Nightmare':[1,500] };
-  const [minN, maxN] = ranges[mode] || ranges['Normal'];
-  const secret = Math.floor(Math.random()*(maxN-minN+1)) + minN;
-  let attempts = 0;
-  const startT = performance.now();
-
-  promptDiv.textContent = `I'm thinking of a number between ${minN} and ${maxN}. Guess!`;
-
-  // disable submit after finish to avoid spamming
-  let finished = false;
-  btn.onclick = async () => {
-    if(finished) return;
-    const v = parseInt(inputEl.value);
-    if(Number.isNaN(v)){ promptDiv.textContent = `Please enter an integer between ${minN} and ${maxN}`; return; }
-    attempts++;
-    document.getElementById('guessAttempts').textContent = attempts;
-    if(v < secret) promptDiv.textContent = 'Too low! Try again.';
-    else if(v > secret) promptDiv.textContent = 'Too high! Try again.';
-    else {
-      finished = true;
-      const elapsed = (performance.now() - startT) / 1000;
-      document.getElementById('guessTime').textContent = elapsed.toFixed(3);
-      promptDiv.textContent = `Correct! The number was ${secret}.`;
-      // achievements
-      const ach = [];
-      if(attempts === 1) ach.push('🏅 Lucky First Guess!');
-      if(elapsed < 5) ach.push('⏱️ Speedy <5s!');
-      if(mode === 'Nightmare' && attempts <= 5) ach.push('🔥 Nightmare Solver!');
-      document.getElementById('guessAchievements').innerHTML = ach.map(a=>`<span class="achievement">${a}</span>`).join('');
-
-      // save score object with attempts & time and session id
-      const doc = { name: playerName, attempts, time: elapsed, ts: Date.now(), session_id: SESSION_ID };
-      await writeScoreToFirestore('guess', mode, doc);
-      // refresh LB for this mode
-      await showGuessLB(mode);
-
-      // also show player's result in case not top 100 (append)
-      const lbDiv = document.getElementById('lb-guess');
-      lbDiv.innerHTML += `<div class="resultline">Your run: ${escapeHTML(playerName)} — Attempts: ${attempts} — ${elapsed.toFixed(3)}s</div>`;
-
-      // disable inputs
-      inputEl.disabled = true;
-      btn.disabled = true;
-    }
-    inputEl.value = '';
-  };
-}
-
-/* ----------------------------
-   GAME: Math Quiz
-   - tiebreaker is time; leaderboard by correct desc, time asc
-   ----------------------------*/
-function setupMath(playerName){
-  const mode = document.getElementById('mathMode').value;
-  document.getElementById('mathPlayer').textContent = playerName;
-  document.getElementById('mathCorrect').textContent = '0';
-  document.getElementById('mathTime').textContent = '0.000';
-  document.getElementById('mathAchievements').innerHTML = '';
-
-  let totalQuestions = (mode === 'Easy') ? 5 : (mode === 'Normal') ? 10 : (mode === 'Hard') ? 15 : 20;
-  let correct = 0;
-  let asked = 0;
-  const t0 = performance.now();
-
-  function nextQuestion(){
-    if(asked >= totalQuestions){
-      finish();
-      return;
-    }
-    asked++;
-    // generate based on difficulty
-    let a,b,op,answer;
-    if(mode === 'Easy'){
-      a = randInt(1,10); b = randInt(1,10);
-      op = (Math.random() < 0.5) ? '+' : '-';
-    } else if(mode === 'Normal'){
-      a = randInt(1,20); b = randInt(1,12); op = pick(['+','-','*']);
-    } else if(mode === 'Hard'){
-      a = randInt(1,30); b = randInt(1,20); op = pick(['+','-','*','/']);
-    } else { // Nightmare
-      // multi-step: (a op b) op2 c
-      a = randInt(10,200); b = randInt(1,200); let c = randInt(1,100);
-      const op1 = pick(['+','-','*']);
-      const op2 = pick(['+','-','*']);
-      // produce expression string
-      const expr = `${a}${op1}${b}${op2}${c}`;
-      answer = Math.round(eval(expr));
-      document.getElementById('mathQuestion').textContent = `Q${asked}: ${expr} = ?`;
-      return;
-    }
-
-    if(op === '+') answer = a + b;
-    if(op === '-') answer = a - b;
-    if(op === '*') answer = a * b;
-    if(op === '/') answer = Math.floor(a / (b || 1));
-
-    document.getElementById('mathQuestion').textContent = `Q${asked}: ${a} ${op} ${b} = ?`;
-    document.getElementById('mathQuestion').dataset.answer = answer;
-  }
-
-  document.getElementById('mathSubmitBtn').onclick = async ()=>{
-    const user = document.getElementById('mathAnswer').value.trim();
-    const ans = document.getElementById('mathQuestion').dataset.answer;
-    if(typeof ans !== 'undefined' && user !== ''){
-      if(Number(user) === Number(ans)) correct++;
-      document.getElementById('mathCorrect').textContent = correct;
-      document.getElementById('mathAnswer').value = '';
-      nextQuestion();
-    } else {
-      // in case Nightmare generated inline expression without dataset (we handled it)
-      const qtext = document.getElementById('mathQuestion').textContent;
-      // user must press submit to proceed - compare numerical answer if we stored above
-      if(user !== '' && Number(user) === Number(ans)) correct++;
-      document.getElementById('mathCorrect').textContent = correct;
-      nextQuestion();
-    }
-    // save interim score (so leaderboards populate) with time so far
-    const elapsed = (performance.now() - t0) / 1000;
-    await writeScoreToFirestore('math', mode, { name: playerName, correct, time: elapsed, ts: Date.now(), session_id: SESSION_ID });
-    await showMathLB(mode);
-  };
-
-  function finish(){
-    const elapsed = (performance.now() - t0) / 1000;
-    document.getElementById('mathTime').textContent = elapsed.toFixed(3);
-    // achievements
-    const ach = [];
-    if(correct === totalQuestions) ach.push('🏅 Perfect Score!');
-    if(mode === 'Nightmare' && correct === totalQuestions) ach.push('🏆 Math Mastermind!');
-    document.getElementById('mathAchievements').innerHTML = ach.map(a=>`<span class="achievement">${a}</span>`).join('');
-    // final save & LB
-    writeScoreToFirestore('math', mode, { name: playerName, correct, time: elapsed, ts: Date.now(), session_id: SESSION_ID }).then(()=> showMathLB(mode));
-  }
-
-  // start first question
-  nextQuestion();
-}
-
-/* ----------------------------
-   GAME: Reaction Game (click-only)
-   - sums reaction times across N rounds (N selectable)
-   - early click disqualifies (no save)
-   - show player result separately
-   ----------------------------*/
-function setupReaction(playerName){
-  document.getElementById('reactionPlayer').textContent = playerName;
-  document.getElementById('reactionTotal').textContent = '0.000';
-  document.getElementById('reactionAchievements').innerHTML = '';
-  const area = document.getElementById('reactionArea');
-  const rounds = Number(document.getElementById('reactionMode').value) || 5;
-  const startBtn = document.getElementById('reactionStartBtn');
-  let roundIdx = 0, totalTime = 0, disqualified = false;
-  let timeoutHandle = null;
-  area.style.background = '#333';
-  area.textContent = `Press Start to play ${rounds} rounds`;
-
-  startBtn.onclick = () => {
-    // disable start while running
-    startBtn.disabled = true;
-    roundIdx = 0;
-    totalTime = 0;
-    disqualified = false;
-    area.style.background = '#444';
-    area.textContent = 'Get ready...';
-    nextRound();
-  };
-
-  function nextRound(){
-    roundIdx++;
-    area.style.background = '#444';
-    area.textContent = `Round ${roundIdx}/${rounds} — Wait...`;
-    let waiting = true;
-    // random delay
-    const delay = Math.random() * 2000 + 800;
-    // early click handler
-    const earlyClick = () => {
-      if(waiting){
-        disqualified = true;
-        cleanup();
-        area.style.background = '#600';
-        area.textContent = 'EARLY! Disqualified.';
-        document.getElementById('reactionAchievements').innerHTML = '<span class="achievement">❌ Early click — result not saved</span>';
-        setTimeout(()=> { startBtn.disabled = false; returnToMenu(); }, 2200);
-      }
+    // ✅ Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBrY0AdHrWI0FdCdhJuTHb43E4HHsJ-2FQ",
+      authDomain: "arcade-games-1e219.firebaseapp.com",
+      projectId: "arcade-games-1e219",
+      storageBucket: "arcade-games-1e219.firebasestorage.app",
+      messagingSenderId: "790089373336",
+      appId: "1:790089373336:web:aea31e89728f14bc67e2ed"
     };
-    area.onclick = earlyClick;
-    timeoutHandle = setTimeout(()=>{
-      if(disqualified) return;
-      waiting = false;
-      const greenTime = performance.now();
-      area.style.background = '#2ecc71';
-      area.textContent = 'CLICK!';
-      // now click to measure
-      area.onclick = () => {
-        const t = performance.now();
-        const elapsed = (t - greenTime) / 1000;
-        totalTime += elapsed;
-        area.style.background = '#333';
-        area.textContent = `Round ${roundIdx}: ${elapsed.toFixed(3)}s`;
-        if(roundIdx < rounds) {
-          setTimeout(nextRound, 700);
-        } else {
-          cleanup();
-          finish();
-          startBtn.disabled = false;
-        }
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let currentGame = null;
+    let currentDifficulty = null;
+    let username = "";
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    // Select difficulty first
+    window.pickDifficulty = function(game) {
+      currentGame = game;
+      showScreen("difficultyScreen");
+    }
+
+    window.setDifficulty = function(diff) {
+      currentDifficulty = diff;
+      showScreen("usernameScreen");
+    }
+
+    // Save username
+    window.confirmUsername = function() {
+      const input = document.getElementById("usernameInput").value.trim();
+      if (!input) return alert("Enter a username!");
+      username = input;
+      document.getElementById("usernameInput").value = "";
+      playGame();
+    }
+
+    // Return to menu
+    window.backToMenu = function() {
+      username = "";
+      currentGame = null;
+      currentDifficulty = null;
+      showScreen("menu");
+    }
+
+    async function playGame() {
+      showScreen("gameScreen");
+      document.getElementById("gameTitle").innerText = `${currentGame} (${currentDifficulty})`;
+      const gameArea = document.getElementById("gameArea");
+      gameArea.innerHTML = "";
+
+      // Difficulty affects parameters
+      const diffSettings = {
+        reaction: {easy: [2000,4000], medium: [1000,3000], hard: [500,2000]},
+        guess: {easy: 50, medium: 100, hard: 500},
+        math: {easy: 5, medium: 10, hard: 15},
+        gibberish: {easy: "catdog", medium: "qwertyui", hard: "asdjklqwezxc"},
+        numberMemory: {easy: 4, medium: 6, hard: 8},
+        sequenceTap: {easy: 3, medium: 5, hard: 7},
+        wordMemory: {easy: 3, medium: 5, hard: 7}
       };
-    }, delay);
-  }
 
-  function cleanup(){
-    if(timeoutHandle){ clearTimeout(timeoutHandle); timeoutHandle = null; }
-    area.onclick = null;
-  }
+      // 🎯 Reaction Test
+      if (currentGame === "reaction") {
+        const [minDelay,maxDelay] = diffSettings.reaction[currentDifficulty];
+        gameArea.innerHTML = `<p>Click when the screen turns green!</p>`;
+        gameArea.style.background = "red";
 
-  async function finish(){
-    if(disqualified) return;
-    document.getElementById('reactionTotal').textContent = totalTime.toFixed(3);
-    // Achievements
-    if(totalTime < rounds * 0.35) document.getElementById('reactionAchievements').innerHTML = '<span class="achievement">⚡ Lightning Reflexes!</span>';
-    if(document.getElementById('reactionMode').value >= 15) document.getElementById('reactionAchievements').innerHTML += '<span class="achievement">Endurance Clicker!</span>';
-    // Save to Firestore
-    const mode = document.getElementById('reactionMode').value;
-    const doc = { name: playerName, totalTime, time: totalTime, ts: Date.now(), session_id: SESSION_ID };
-    await writeScoreToFirestore('reaction', mode, doc);
-    await showReactionLB(mode);
-    // show player's run separately
-    const lbDiv = document.getElementById('lb-reaction');
-    lbDiv.innerHTML += `<div class="resultline">Your run: ${escapeHTML(playerName)} — ${totalTime.toFixed(3)}s</div>`;
-    // do not immediately return to menu — let player inspect then return manually
-  }
-}
-
-/* ----------------------------
-   GAME: Gibberish Typing
-   - show N words (do not disappear), type them and press Enter to submit
-   - 100% accuracy required to be saved
-   - leaderboard ranked by time ascending (faster is better)
-   ----------------------------*/
-function setupTyping(playerName){
-  document.getElementById('typingPlayer').textContent = playerName;
-  document.getElementById('typingTime').textContent = '0.000';
-  document.getElementById('typingAchievements').innerHTML = '';
-  const n = Number(document.getElementById('typingMode').value) || 10;
-  const play = document.getElementById('typingPlay');
-  const input = document.getElementById('typingInput');
-  input.disabled = true;
-  input.value = '';
-  // generate gibberish words (random letter strings)
-  const words = [];
-  for(let i=0;i<n;i++){
-    let len = 3 + Math.floor(Math.random()*6);
-    let w = '';
-    for(let j=0;j<len;j++) w += String.fromCharCode(97 + Math.floor(Math.random()*26));
-    words.push(w);
-  }
-  play.innerHTML = `<div style="background:#0b0c0d;padding:10px;border-radius:8px">${escapeHTML(words.join(' '))}</div>`;
-  input.disabled = false; input.focus();
-  const t0 = performance.now();
-  function submit(){
-    const typed = input.value.trim();
-    input.disabled = true;
-    const elapsed = (performance.now() - t0) / 1000;
-    document.getElementById('typingTime').textContent = elapsed.toFixed(3);
-    if(typed === words.join(' ')){
-      document.getElementById('typingAchievements').innerHTML = '<span class="achievement">🏆 100% Accuracy!</span>';
-      // Save — faster better
-      const mode = String(n);
-      const doc = { name: playerName, time: elapsed, score: 0, ts: Date.now(), session_id: SESSION_ID };
-      // We store time; leaderboard sorts ascending client-side
-      await writeScoreToFirestore('typing', mode, doc);
-      await showTypingLB(mode);
-      // show player's run
-      document.getElementById('lb-typing').innerHTML += `<div class="resultline">Your run: ${escapeHTML(playerName)} — ${elapsed.toFixed(3)}s</div>`;
-    } else {
-      document.getElementById('typingAchievements').innerHTML = '<span class="achievement">❌ Incorrect — not saved</span>';
-    }
-    setTimeout(()=>{ /* allow user to return */ }, 1200);
-  }
-  input.onkeydown = (e) => { if(e.key === 'Enter') submit(); };
-}
-
-/* ----------------------------
-   GAME: Number Memory
-   - shows a sequence then hides; user types back digits without spaces
-   - if correct, save time; leaderboard by time ascending
-   ----------------------------*/
-function setupNumMemory(playerName){
-  document.getElementById('numPlayer').textContent = playerName;
-  document.getElementById('numTime').textContent = '0.000';
-  document.getElementById('numAchievements').innerHTML = '';
-  const len = Number(document.getElementById('numMode').value) || 5;
-  const play = document.getElementById('numPlay');
-  const display = document.getElementById('numPlay');
-  const digits = [];
-  for(let i=0;i<len;i++) digits.push(String(Math.floor(Math.random()*10)));
-  // show digits briefly then hide and allow input
-  play.innerHTML = `<div style="font-size:22px;letter-spacing:8px">${digits.join(' ')}</div>`;
-  const displayMs = Math.max(600, len * 450);
-  setTimeout(()=>{
-    play.innerHTML = '';
-    const input = document.createElement('input'); input.type='text'; input.placeholder='Type digits without spaces';
-    const btn = document.createElement('button'); btn.textContent='Submit';
-    const info = document.createElement('div');
-    play.appendChild(input); play.appendChild(btn); play.appendChild(info);
-    const t0 = performance.now();
-    btn.onclick = async ()=>{
-      const typed = (input.value||'').replace(/\s+/g,'');
-      const elapsed = (performance.now() - t0)/1000;
-      document.getElementById('numTime').textContent = elapsed.toFixed(3);
-      if(typed === digits.join('')){
-        document.getElementById('numAchievements').innerHTML = '<span class="achievement">🏆 Perfect!</span>';
-        const mode = String(len);
-        const doc = { name: playerName, time: elapsed, length: len, score: len, ts: Date.now(), session_id: SESSION_ID };
-        await writeScoreToFirestore('numMemory', mode, doc);
-        await showNumMemoryLB(mode);
-        document.getElementById('lb-numMemory').innerHTML += `<div class="resultline">Your run: ${escapeHTML(playerName)} — ${elapsed.toFixed(3)}s</div>`;
-      } else {
-        document.getElementById('numAchievements').innerHTML = '<span class="achievement">❌ Incorrect — not saved</span>';
+        setTimeout(() => {
+          gameArea.style.background = "green";
+          const start = performance.now();
+          gameArea.onclick = async () => {
+            const end = performance.now();
+            const time = (end - start).toFixed(3);
+            await saveScore(time);
+            showLeaderboard();
+          }
+        }, Math.random()*(maxDelay-minDelay)+minDelay);
       }
-      input.disabled = true; btn.disabled = true;
-    };
-    input.addEventListener('keydown', e=>{ if(e.key==='Enter') btn.click(); });
-  }, displayMs);
-}
 
-/* ----------------------------
-   GAME: Sequence Tap (colors)
-   - flashes a sequence of colors, then player reproduces by clicking palette
-   - saves total reproduce time if correct; higher length better (score), then time asc
-   ----------------------------*/
-function setupSeqTap(playerName){
-  document.getElementById('seqPlayer').textContent = playerName;
-  document.getElementById('seqTime').textContent = '0.000';
-  document.getElementById('seqAchievements').innerHTML = '';
-  const length = Number(document.getElementById('seqMode').value) || 5;
-  const play = document.getElementById('seqPlay');
-  const paletteColors = ['#e74c3c','#2ecc71','#3498db','#f1c40f','#9b59b6','#e67e22'];
-  const seq = [];
-  for(let i=0;i<length;i++) seq.push(paletteColors[Math.floor(Math.random()*paletteColors.length)]);
-  play.innerHTML = '<div id="seqFlash" style="min-height:90px"></div>';
-  const flashDiv = document.getElementById('seqFlash');
-  let idx = 0;
-  function flashNext(){
-    flashDiv.innerHTML = '';
-    if(idx >= seq.length){
-      showPalette();
-      return;
-    }
-    const box = document.createElement('div');
-    box.style.width = '120px'; box.style.height = '120px'; box.style.background = seq[idx];
-    box.style.margin = '6px auto'; box.style.borderRadius = '10px';
-    flashDiv.appendChild(box);
-    setTimeout(()=>{ idx++; flashNext(); }, 600);
-  }
-  function showPalette(){
-    flashDiv.innerHTML = '<div style="margin-bottom:8px">Now reproduce the sequence by clicking the colors</div>';
-    const palette = document.createElement('div');
-    palette.style.textAlign = 'center';
-    palette.style.userSelect = 'none';
-    // create buttons
-    const buttons = [];
-    paletteColors.forEach(c=>{
-      const btn = document.createElement('div');
-      btn.className = 'color-btn';
-      btn.style.background = c;
-      btn.onclick = ()=> handleColor(c);
-      palette.appendChild(btn);
-      buttons.push(btn);
-    });
-    flashDiv.appendChild(palette);
-    const t0 = performance.now();
-    let pos = 0;
-    function handleColor(col){
-      if(pos >= seq.length) return;
-      if(col !== seq[pos]){
-        document.getElementById('seqAchievements').innerHTML = '<span class="achievement">❌ Wrong — not saved</span>';
-        // disable palette
-        buttons.forEach(b=>b.onclick = null);
-        return;
+      // 🔢 Guess the Number
+      else if (currentGame === "guess") {
+        const maxNum = diffSettings.guess[currentDifficulty];
+        const number = Math.floor(Math.random() * maxNum) + 1;
+        let attempts = 0;
+        gameArea.innerHTML = `<p>Guess a number between 1 and ${maxNum}</p>
+        <input type="number" id="guessInput">
+        <button id="guessBtn">Guess</button>
+        <p id="feedback"></p>`;
+
+        document.getElementById("guessBtn").onclick = async () => {
+          attempts++;
+          const val = parseInt(document.getElementById("guessInput").value);
+          if (val === number) {
+            await saveScore(attempts);
+            showLeaderboard();
+          } else if (val < number) {
+            document.getElementById("feedback").innerText = "Too low!";
+          } else {
+            document.getElementById("feedback").innerText = "Too high!";
+          }
+        }
       }
-      pos++;
-      if(pos >= seq.length){
-        const elapsed = (performance.now() - t0) / 1000;
-        document.getElementById('seqTime').textContent = elapsed.toFixed(3);
-        if(elapsed < length * 0.4) document.getElementById('seqAchievements').innerHTML = '<span class="achievement">⚡ Lightning Sequence!</span>';
-        const mode = String(length);
-        const doc = { name: playerName, score: length, time: elapsed, ts: Date.now(), session_id: SESSION_ID };
-        writeScoreToFirestore('seqTap', mode, doc).then(()=> showSeqTapLB(mode));
-        // disable palette
-        buttons.forEach(b=>b.onclick = null);
-        // show player run appended
-        const lbDiv = document.getElementById('lb-seqTap');
-        lbDiv.innerHTML += `<div class="resultline">Your run: ${escapeHTML(playerName)} — ${elapsed.toFixed(3)}s</div>`;
+
+      // ➕ Math Quiz
+      else if (currentGame === "math") {
+        let correct = 0, total = diffSettings.math[currentDifficulty], start = performance.now();
+        askQ();
+
+        function askQ() {
+          if (correct === total) {
+            const end = performance.now();
+            const time = (end - start).toFixed(3);
+            saveScore(time).then(() => showLeaderboard());
+            return;
+          }
+          const a = Math.floor(Math.random() * 20);
+          const b = Math.floor(Math.random() * 20);
+          gameArea.innerHTML = `<p>${a} + ${b} = ?</p>
+          <input id="mathAns"><button id="mathBtn">Submit</button>`;
+          document.getElementById("mathBtn").onclick = () => {
+            if (parseInt(document.getElementById("mathAns").value) === a + b) {
+              correct++;
+              askQ();
+            } else {
+              alert("Wrong!");
+            }
+          }
+        }
+      }
+
+      // 🤪 Gibberish Typing
+      else if (currentGame === "gibberish") {
+        const text = diffSettings.gibberish[currentDifficulty];
+        const start = performance.now();
+        gameArea.innerHTML = `<p>Type this exactly: <b>${text}</b></p>
+        <input id="gibInput"><button id="gibBtn">Submit</button>`;
+        document.getElementById("gibBtn").onclick = async () => {
+          if (document.getElementById("gibInput").value === text) {
+            const end = performance.now();
+            const time = (end - start).toFixed(3);
+            await saveScore(time);
+            showLeaderboard();
+          } else alert("Wrong text!");
+        }
+      }
+
+      // 🔢 Number Memory
+      else if (currentGame === "numberMemory") {
+        const len = diffSettings.numberMemory[currentDifficulty];
+        const number = Array.from({length:len},()=>Math.floor(Math.random()*10)).join("");
+        gameArea.innerHTML = `<p>Memorize this number:</p><h2>${number}</h2>`;
+        setTimeout(() => {
+          gameArea.innerHTML = `<p>Enter the number:</p>
+          <input id="numInput"><button id="numBtn">Submit</button>`;
+          document.getElementById("numBtn").onclick = async () => {
+            if (document.getElementById("numInput").value === number) {
+              await saveScore(len);
+              showLeaderboard();
+            } else alert("Wrong!");
+          }
+        }, 2000);
+      }
+
+      // 🔢 Sequence Tap
+      else if (currentGame === "sequenceTap") {
+        const len = diffSettings.sequenceTap[currentDifficulty];
+        const seq = Array.from({length:len},()=>Math.floor(Math.random()*9)+1);
+        gameArea.innerHTML = `<p>Memorize this sequence:</p><h2>${seq.join(" ")}</h2>`;
+        setTimeout(() => {
+          gameArea.innerHTML = `<p>Enter the sequence (space-separated):</p>
+          <input id="seqInput"><button id="seqBtn">Submit</button>`;
+          document.getElementById("seqBtn").onclick = async () => {
+            const val = document.getElementById("seqInput").value.trim().split(" ").map(Number);
+            if (JSON.stringify(val)===JSON.stringify(seq)) {
+              await saveScore(len);
+              showLeaderboard();
+            } else alert("Wrong!");
+          }
+        }, 3000);
+      }
+
+      // 📝 Word Memory Chain
+      else if (currentGame === "wordMemory") {
+        const len = diffSettings.wordMemory[currentDifficulty];
+        const words = ["apple","dog","sky","car","book","tree","star","moon"];
+        let index = 0;
+        let chain = [];
+        nextWord();
+
+        function nextWord() {
+          if (index >= len) {
+            saveScore(chain.length).then(() => showLeaderboard());
+            return;
+          }
+          const word = words[index++];
+          chain.push(word);
+          gameArea.innerHTML = `<p>Words so far: ${chain.join(", ")}</p>
+          <p>Repeat the chain:</p>
+          <input id="wordInput"><button id="wordBtn">Submit</button>`;
+          document.getElementById("wordBtn").onclick = () => {
+            const val = document.getElementById("wordInput").value.trim().split(" ");
+            if (JSON.stringify(val)===JSON.stringify(chain)) {
+              nextWord();
+            } else alert("Wrong sequence!");
+          }
+        }
       }
     }
-  }
-  flashNext();
-}
 
-/* ----------------------------
-   GAME: Word Memory Chain
-   - shows words chain, hides, user types back words separated by spaces
-   - saves when correct and ranks by length (score) desc, time asc
-   ----------------------------*/
-const WORD_BANK = ['apple','orange','banana','grape','peach','melon','kiwi','mango','pear','plum','lemon','lime','apricot','berry','cherry','date','fig','guava','papaya','quince','raisin','vanilla','walnut','radish','spinach','kale','onion','pepper','tomato','garlic','potato','broccoli','carrot','celery','lettuce','mushroom','cabbage','pumpkin','ginger','basil','rosemary','olive','nectarine','coconut','pineapple','strawberry','raspberry'];
+    // Save score to game_difficulty
+    async function saveScore(score) {
+      await addDoc(collection(db, `${currentGame}_${currentDifficulty}`), {
+        username,
+        score,
+        timestamp: Date.now()
+      });
+    }
 
-function setupWordChain(playerName){
-  document.getElementById('wordPlayer').textContent = playerName;
-  document.getElementById('wordTime').textContent = '0.000';
-  document.getElementById('wordAchievements').innerHTML = '';
-  const len = Number(document.getElementById('wordMode').value) || 7;
-  const play = document.getElementById('wordPlay');
-  const seq = [];
-  for(let i=0;i<len;i++) seq.push(WORD_BANK[Math.floor(Math.random()*WORD_BANK.length)]);
-  play.innerHTML = `<div style="font-size:18px;padding:8px;background:#0b0c0d;border-radius:8px">${escapeHTML(seq.join(' '))}</div>`;
-  const displayMs = Math.max(1000, len * 600);
-  setTimeout(()=>{
-    play.innerHTML = '';
-    const input = document.getElementById('wordInput');
-    input.disabled = false; input.value = ''; input.focus();
-    const submitBtn = document.createElement('button'); submitBtn.textContent = 'Submit';
-    play.appendChild(submitBtn);
-    const t0 = performance.now();
-    submitBtn.onclick = async ()=>{
-      submitBtn.disabled = true; input.disabled = true;
-      const typed = (input.value || '').trim().split(/\s+/);
-      const elapsed = (performance.now() - t0)/1000;
-      document.getElementById('wordTime').textContent = elapsed.toFixed(3);
-      let ok = typed.length === seq.length;
-      if(ok){
-        for(let i=0;i<seq.length;i++){ if(typed[i] !== seq[i]) { ok = false; break; } }
-      }
-      if(ok){
-        document.getElementById('wordAchievements').innerHTML = '<span class="achievement">🏆 Correct!</span>';
-        const mode = String(len);
-        const doc = { name: playerName, score: len, time: elapsed, ts: Date.now(), session_id: SESSION_ID };
-        await writeScoreToFirestore('wordChain', mode, doc);
-        await showWordChainLB(mode);
-        document.getElementById('lb-wordChain').innerHTML += `<div class="resultline">Your run: ${escapeHTML(playerName)} — ${elapsed.toFixed(3)}s</div>`;
-      } else {
-        document.getElementById('wordAchievements').innerHTML = '<span class="achievement">❌ Incorrect — not saved</span>';
-      }
-      setTimeout(()=>{/* allow user to inspect leaderboard */}, 1200);
-    };
-    input.addEventListener('keydown', e=>{ if(e.key === 'Enter') submitBtn.click(); });
-  }, displayMs);
-}
-
-/* ----------------------------
-   utility helpers used above
-   ----------------------------*/
-function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
-function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-
-/* ----------------------------
-   show LB wrappers for each game-mode
-   invoke the appropriate display function depending on game
-   ----------------------------*/
-async function showGuessLB(mode){ await showGuessLB(mode); } // function name collision guard (already defined above)
-async function showMathLB(mode){ await showMathLB(mode); }
-async function showReactionLB(mode){ await showReactionLB(mode); }
-async function showTypingLB(mode){ await showTypingLB(mode); }
-async function showNumMemoryLB(mode){ await showNumMemoryLB(mode); }
-async function showSeqTapLB(mode){ await showSeqTapLB(mode); }
-async function showWordChainLB(mode){ await showWordChainLB(mode); }
-
-// Actually the above lines refer to the functions defined earlier with the same names
-// but to avoid confusion with the declared names we simply reuse them
-
-/* ----------------------------
-   Expose enterGame & returnToMenu on window for HTML to use
-   ----------------------------*/
-window.enterGame = enterGame;
-window.returnToMenu = returnToMenu;
-
-/* ----------------------------
-   End of script
-   ----------------------------*/
-</script>
+    // Leaderboard for that difficulty
+    async function showLeaderboard() {
+      showScreen("leaderboard");
+      document.getElementById("leaderboardTitle").innerText = `${currentGame} (${currentDifficulty}) Leaderboard`;
+      const q = query(collection(db, `${currentGame}_${currentDifficulty}`), orderBy("score", "asc"), limit(100));
+      const docs = await getDocs(q);
+      const body = document.getElementById("leaderboardBody");
+      body.innerHTML = "";
+      let rank = 1;
+      docs.forEach(doc => {
+        const data = doc.data();
+        body.innerHTML += `<tr><td>${rank++}</td><td>${data.username}</td><td>${data.score}</td></tr>`;
+      });
+    }
+  </script>
 </body>
 </html>
+
 
 
 
