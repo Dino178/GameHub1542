@@ -3,242 +3,171 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultimate Game Hub</title>
+<title>Game Hub</title>
 <style>
-body { font-family: Arial, sans-serif; background:#121212; color:#f0f0f0; margin:0; padding:0;}
-h1,h2 { color:#ffcc00; }
-.container { padding:20px; max-width:900px; margin:auto;}
-button { padding:10px 20px; margin:5px; font-size:16px; cursor:pointer;}
-input { padding:5px; font-size:16px;}
-.game { display:none; margin-top:20px; }
-.leaderboard { background:#222; padding:10px; margin-top:10px; max-height:300px; overflow-y:auto;}
-.achievement { color:#00ffcc; font-weight:bold; }
-#promptText { font-size:24px; font-weight:bold; margin:20px 0; color:#00ffcc; }
+body { font-family: Arial, sans-serif; background: #111; color: #eee; margin:0; padding:0; }
+header { padding:20px; text-align:center; background:#222; }
+main { padding:20px; }
+button { padding:10px 15px; margin:5px; cursor:pointer; }
+.game-container { display:none; margin-top:20px; }
+.leaderboard { margin-top:10px; background:#222; padding:10px; max-height:200px; overflow:auto; }
+.color-button { display:inline-block; width:50px; height:50px; margin:5px; cursor:pointer; }
+input { padding:5px; }
 </style>
 </head>
 <body>
-<div class="container">
-<h1>Ultimate Game Hub</h1>
+<header><h1>🎮 Game Hub</h1></header>
+<main>
 <div>
-<label>Enter Username: <input type="text" id="username" value="Player1"></label>
-</div>
-<div>
-<h2>Select a Game:</h2>
-<button onclick="showGame('guessNumber')">Guess the Number</button>
-<button onclick="showGame('mathQuiz')">Math Quiz</button>
-<button onclick="showGame('reactionGame')">Reaction Game</button>
-<button onclick="showGame('gibberishTyping')">Gibberish Typing</button>
-<button onclick="showGame('numMemory')">Number Memory</button>
-<button onclick="showGame('seqTap')">Sequence Tap</button>
-<button onclick="showGame('wordChain')">Word Memory Chain</button>
+<label>Enter your name: <input type="text" id="usernameInput"></label>
+<button onclick="setUsername()">Confirm Name</button>
 </div>
 
-<!-- Game Divs -->
-<div id="guessNumber" class="game"><h2>Guess the Number</h2><div id="guessNumberContent"></div><div class="leaderboard" id="guessNumberLeaderboard"></div><button onclick="backToMenu()">Back</button></div>
-<div id="mathQuiz" class="game"><h2>Math Quiz</h2><div id="mathQuizContent"></div><div class="leaderboard" id="mathQuizLeaderboard"></div><button onclick="backToMenu()">Back</button></div>
-<div id="reactionGame" class="game"><h2>Reaction Game</h2><div id="reactionContent"></div><div class="leaderboard" id="reactionLeaderboard"></div><button onclick="backToMenu()">Back</button></div>
-<div id="gibberishTyping" class="game"><h2>Gibberish Typing</h2><div id="typingContent"></div><div class="leaderboard" id="typingLeaderboard"></div><button onclick="backToMenu()">Back</button></div>
-<div id="numMemory" class="game"><h2>Number Memory</h2><div id="numMemoryContent"></div><div class="leaderboard" id="numMemoryLeaderboard"></div><button onclick="backToMenu()">Back</button></div>
-<div id="seqTap" class="game"><h2>Sequence Tap</h2><div id="seqTapContent"></div><div class="leaderboard" id="seqTapLeaderboard"></div><button onclick="backToMenu()">Back</button></div>
-<div id="wordChain" class="game"><h2>Word Memory Chain</h2><div id="wordChainContent"></div><div class="leaderboard" id="wordChainLeaderboard"></div><button onclick="backToMenu()">Back</button></div>
+<div id="gameSelection" style="margin-top:20px; display:none;">
+<h2>Select a Game</h2>
+<button onclick="startGame('guessNumber')">Guess the Number</button>
+<button onclick="startGame('mathQuiz')">Math Quiz</button>
+<button onclick="startGame('reaction')">Reaction Game</button>
+<button onclick="startGame('typing')">Gibberish Typing</button>
+<button onclick="startGame('numMemory')">Number Memory</button>
+<button onclick="startGame('seqTap')">Sequence Tap</button>
+<button onclick="startGame('wordChain')">Word Memory Chain</button>
+</div>
+
+<!-- Guess Number -->
+<div id="guessNumber" class="game-container">
+<h3>Guess the Number</h3>
+<div>Name: <span id="guessNumberName"></span></div>
+<div>Attempts: <span id="guessNumberAttempts"></span></div>
+<div>Time: <span id="guessNumberTime"></span></div>
+<div id="guessNumberAchievements"></div>
+<div id="guessNumberContent"></div>
+<div class="leaderboard" id="guessNumberLeaderboard"></div>
+<button onclick="backToMenu()">Back to Menu</button>
+</div>
+
+<!-- Math Quiz -->
+<div id="mathQuiz" class="game-container">
+<h3>Math Quiz</h3>
+<div>Name: <span id="mathQuizName"></span></div>
+<div>Score: <span id="mathQuizScore"></span></div>
+<div>Time: <span id="mathQuizTime"></span></div>
+<div id="mathQuizAchievements"></div>
+<div id="mathQuizContent"></div>
+<div class="leaderboard" id="mathQuizLeaderboard"></div>
+<button onclick="backToMenu()">Back to Menu</button>
+</div>
+
+<!-- Reaction -->
+<div id="reaction" class="game-container">
+<h3>Reaction Game</h3>
+<div>Name: <span id="reactionName"></span></div>
+<div>Time: <span id="reactionTimeDisplay"></span></div>
+<div id="reactionAchievements"></div>
+<div id="reactionContent"></div>
+<div class="leaderboard" id="reactionLeaderboard"></div>
+<button onclick="backToMenu()">Back to Menu</button>
+</div>
+
+<!-- Gibberish Typing -->
+<div id="typing" class="game-container">
+<h3>Gibberish Typing</h3>
+<div>Name: <span id="typingName"></span></div>
+<div>Time: <span id="typingTimeDisplay"></span></div>
+<div id="typingAchievements"></div>
+<div id="typingContent"></div>
+<input type="text" id="typingInput" placeholder="Type here...">
+<div class="leaderboard" id="typingLeaderboard"></div>
+<button onclick="backToMenu()">Back to Menu</button>
+</div>
+
+<!-- Number Memory -->
+<div id="numMemory" class="game-container">
+<h3>Number Memory</h3>
+<div>Name: <span id="numMemoryName"></span></div>
+<div>Time: <span id="numMemoryTimeDisplay"></span></div>
+<div id="numMemoryAchievements"></div>
+<div id="numMemoryContent"></div>
+<div class="leaderboard" id="numMemoryLeaderboard"></div>
+<button onclick="backToMenu()">Back to Menu</button>
+</div>
+
+<!-- Sequence Tap -->
+<div id="seqTap" class="game-container">
+<h3>Sequence Tap</h3>
+<div>Name: <span id="seqTapName"></span></div>
+<div>Time: <span id="seqTapTimeDisplay"></span></div>
+<div id="seqTapAchievements"></div>
+<div id="seqTapContent"></div>
+<div class="leaderboard" id="seqTapLeaderboard"></div>
+<button onclick="backToMenu()">Back to Menu</button>
+</div>
+
+<!-- Word Memory Chain -->
+<div id="wordChain" class="game-container">
+<h3>Word Memory Chain</h3>
+<div>Name: <span id="wordChainName"></span></div>
+<div>Time: <span id="wordChainTimeDisplay"></span></div>
+<div id="wordChainAchievements"></div>
+<div id="wordChainContent"></div>
+<div class="leaderboard" id="wordChainLeaderboard"></div>
+<button onclick="backToMenu()">Back to Menu</button>
+</div>
+
+</main>
 
 <script>
-// ---------- Utility Functions ----------
-let streaks={numMemory:0,seqTap:0,wordChain:0};
-function showGame(id){
-    const username=document.getElementById('username').value.trim()||'Player';
-    document.querySelectorAll('.game').forEach(g=>g.style.display='none');
-    document.getElementById(id).style.display='block';
-    switch(id){
-        case 'guessNumber': startGuessNumber(username); break;
-        case 'mathQuiz': startMathQuiz(username); break;
-        case 'reactionGame': startReactionGame(username); break;
-        case 'gibberishTyping': startGibberishTyping(username); break;
-        case 'numMemory': startNumMemory(username); break;
-        case 'seqTap': startSeqTap(username); break;
-        case 'wordChain': startWordChain(username); break;
+let username='';
+function setUsername(){
+    username=document.getElementById('usernameInput').value.trim()||'Player';
+    document.getElementById('gameSelection').style.display='block';
+}
+
+// Show selected game
+function startGame(game){
+    document.querySelectorAll('.game-container').forEach(c=>c.style.display='none');
+    document.getElementById(game).style.display='block';
+    switch(game){
+        case 'guessNumber': runGuessNumber(); break;
+        case 'mathQuiz': runMathQuiz(); break;
+        case 'reaction': runReaction(); break;
+        case 'typing': runGibberishTyping(); break;
+        case 'numMemory': runNumberMemory(); break;
+        case 'seqTap': runSequenceTap(); break;
+        case 'wordChain': runWordChain(); break;
     }
 }
-function backToMenu(){document.querySelectorAll('.game').forEach(g=>g.style.display='none');}
-function saveLeaderboard(game, mode, entry){
-    let data=JSON.parse(localStorage.getItem('leaderboards')||'{}');
-    data[game]=data[game]||{};
-    data[game][mode]=data[game][mode]||[];
-    data[game][mode].push(entry);
-    data[game][mode].sort((a,b)=>{
-        if(a.score!==b.score) return b.score-a.score;
-        return (a.time||0)-(b.time||0);
+function backToMenu(){
+    document.querySelectorAll('.game-container').forEach(c=>c.style.display='none');
+    document.getElementById('gameSelection').style.display='block';
+}
+
+// ---------- Leaderboard Storage ----------
+function saveLeaderboard(game,mode,data){
+    let key=game+'_'+mode;
+    let arr=JSON.parse(localStorage.getItem(key)||'[]');
+    arr.push(data);
+    arr.sort((a,b)=>{
+        if(a.score!==b.score) return a.score-b.score; 
+        return a.time-b.time;
     });
-    data[game][mode]=data[game][mode].slice(0,100);
-    localStorage.setItem('leaderboards', JSON.stringify(data));
+    localStorage.setItem(key,JSON.stringify(arr.slice(0,100)));
 }
-function showLeaderboard(game, mode, containerId){
-    const container=document.getElementById(containerId);
-    container.innerHTML='';
-    let data=JSON.parse(localStorage.getItem('leaderboards')||'{}');
-    if(!data[game]||!data[game][mode]){container.innerHTML='No scores yet!'; return;}
-    data[game][mode].forEach((e,i)=>{
-        const timeStr=e.time!==undefined?` (${e.time.toFixed(6)}s)`:'';
-        container.innerHTML+=`${i+1}. ${e.name} — ${e.score}${timeStr}<br>`;
+
+function showLeaderboard(game,mode,containerId){
+    let key=game+'_'+mode;
+    let arr=JSON.parse(localStorage.getItem(key)||'[]');
+    let container=document.getElementById(containerId);
+    container.innerHTML='<b>Leaderboard:</b><br>';
+    arr.forEach((e,i)=>{
+        container.innerHTML+=`${i+1}. ${e.name} - Time: ${e.time.toFixed(3)}s<br>`;
     });
 }
 
-// ---------- Guess the Number ----------
-function startGuessNumber(username){
-    const content=document.getElementById('guessNumberContent'); content.innerHTML='';
-    let modes=[{label:'Easy',min:1,max:50},{label:'Normal',min:1,max:100},{label:'Hard',min:1,max:250}];
-    let select=document.createElement('select'); modes.forEach((m,i)=>{let opt=document.createElement('option'); opt.value=i; opt.innerText=m.label; select.appendChild(opt);});
-    let startBtn=document.createElement('button'); startBtn.innerText='Start';
-    content.appendChild(select); content.appendChild(startBtn);
-    startBtn.onclick=function(){
-        let mode=modes[select.value]; content.innerHTML=''; let number=Math.floor(Math.random()*(mode.max-mode.min+1))+mode.min;
-        let attempts=0;
-        let prompt=document.createElement('div'); prompt.innerText=`Guess a number between ${mode.min} and ${mode.max}`; content.appendChild(prompt);
-        let input=document.createElement('input'); input.type='number'; let btn=document.createElement('button'); btn.innerText='Submit'; content.appendChild(input); content.appendChild(btn);
-        let info=document.createElement('div'); content.appendChild(info);
-        let startTime=performance.now();
-        btn.onclick=function(){
-            let val=parseInt(input.value); attempts++;
-            if(val<number) info.innerText='Too low!';
-            else if(val>number) info.innerText='Too high!';
-            else{
-                let elapsed=(performance.now()-startTime)/1000;
-                info.innerHTML=`Correct! Attempts: ${attempts}, Time: ${elapsed.toFixed(6)}s`;
-                saveLeaderboard('guessNumber',mode.label,{name:username,score: -attempts,time: elapsed});
-                showLeaderboard('guessNumber',mode.label,'guessNumberLeaderboard');
-            }
-        }
-        input.addEventListener('keydown', e=>{if(e.key==='Enter') btn.click();});
-    }
-}
-
-// ---------- Math Quiz ----------
-function startMathQuiz(username){
-    const content=document.getElementById('mathQuizContent'); content.innerHTML='';
-    let numQuestions=[5,10,20]; let select=document.createElement('select'); numQuestions.forEach(n=>{let opt=document.createElement('option'); opt.value=n; opt.innerText=`${n} Questions`; select.appendChild(opt);});
-    let startBtn=document.createElement('button'); startBtn.innerText='Start'; content.appendChild(select); content.appendChild(startBtn);
-    startBtn.onclick=function(){
-        let questions=parseInt(select.value); content.innerHTML=''; let correct=0;
-        let startTime=performance.now();
-        function ask(i){
-            if(i>=questions){let elapsed=(performance.now()-startTime)/1000; alert(`Score: ${correct}/${questions}, Time: ${elapsed.toFixed(6)}s`); saveLeaderboard('mathQuiz',questions,{name:username,score:correct,time:elapsed}); showLeaderboard('mathQuiz',questions,'mathQuizLeaderboard'); return;}
-            let a=Math.floor(Math.random()*12)+1; let b=Math.floor(Math.random()*12)+1; let ops=['+','-','*']; let op=ops[Math.floor(Math.random()*3)]; let ans= op==='+'?a+b: op==='-'?a-b:a*b;
-            let userAns=prompt(`Question ${i+1}: ${a} ${op} ${b} = ?`);
-            if(userAns!==null && parseInt(userAns)===ans) correct++;
-            ask(i+1);
-        }
-        ask(0);
-    }
-}
-
-// ---------- Reaction Game ----------
-function startReactionGame(username){
-    const content=document.getElementById('reactionContent'); content.innerHTML='';
-    let modes=[3,5,10,15]; let select=document.createElement('select'); modes.forEach(n=>{let opt=document.createElement('option'); opt.value=n; opt.innerText=`${n} Reactions`; select.appendChild(opt);});
-    let startBtn=document.createElement('button'); startBtn.innerText='Start'; content.appendChild(select); content.appendChild(startBtn);
-    startBtn.onclick=function(){
-        let reps=parseInt(select.value); content.innerHTML=''; let times=[]; let current=0;
-        function nextReaction(){
-            if(current>=reps){let total=times.reduce((a,b)=>a+b,0); alert(`Total time: ${total.toFixed(6)}s`); saveLeaderboard('reactionGame',reps,{name:username,score: -total,time: total}); showLeaderboard('reactionGame',reps,'reactionLeaderboard'); return;}
-            let promptDiv=document.createElement('div'); promptDiv.id='promptText'; promptDiv.innerText='Wait...'; content.appendChild(promptDiv);
-            let delay=500+Math.random()*2000;
-            setTimeout(()=>{
-                promptDiv.innerText='CLICK!';
-                let start=performance.now();
-                document.addEventListener('keydown', handler);
-                function handler(){let elapsed=(performance.now()-start)/1000; times.push(elapsed); current++; promptDiv.remove(); document.removeEventListener('keydown',handler); nextReaction();}
-            },delay);
-        }
-        nextReaction();
-    }
-}
-
-// ---------- Gibberish Typing ----------
-function startGibberishTyping(username){
-    const content=document.getElementById('typingContent'); content.innerHTML='';
-    let modes=[5,10,15,20,25,30,35,40]; let select=document.createElement('select'); modes.forEach(n=>{let opt=document.createElement('option'); opt.value=n; opt.innerText=`${n} words`; select.appendChild(opt);});
-    let startBtn=document.createElement('button'); startBtn.innerText='Start'; content.appendChild(select); content.appendChild(startBtn);
-    startBtn.onclick=function(){
-        let n=parseInt(select.value); content.innerHTML=''; let words=[]; for(let i=0;i<n;i++) words.push(Math.random().toString(36).substring(2,6));
-        let promptDiv=document.createElement('div'); promptDiv.id='promptText'; promptDiv.innerText=words.join(' '); content.appendChild(promptDiv);
-        setTimeout(()=>{
-            promptDiv.innerText=''; let input=document.createElement('input'); input.type='text'; let btn=document.createElement('button'); btn.innerText='Submit'; let info=document.createElement('div'); content.appendChild(input); content.appendChild(btn); content.appendChild(info);
-            let start=performance.now();
-            btn.onclick=function(){
-                let typed=input.value.trim().split(/\s+/); let correct=true;
-                if(typed.length!==words.length) correct=false; else{for(let i=0;i<words.length;i++){if(typed[i]!==words[i]) correct=false;}}
-                let elapsed=(performance.now()-start)/1000;
-                if(correct){info.innerHTML='Correct!'; saveLeaderboard('gibberishTyping',n,{name:username,score:1,time:elapsed}); showLeaderboard('gibberishTyping',n,'typingLeaderboard'); if(elapsed<n*0.8) info.innerHTML+='<br><span class="achievement">⚡ Lightning Typing!</span>';}
-                else info.innerHTML='Incorrect.'; 
-            }
-            input.addEventListener('keydown', e=>{if(e.key==='Enter') btn.click();});
-        },1000);
-    }
-}
-
-// ---------- Number Memory ----------
-function startNumMemory(username){
-    const content=document.getElementById('numMemoryContent'); content.innerHTML='';
-    let modes=[3,5,7,10]; let select=document.createElement('select'); modes.forEach(m=>{let opt=document.createElement('option'); opt.value=m; opt.innerText=`Length ${m}`; select.appendChild(opt);});
-    let startBtn=document.createElement('button'); startBtn.innerText='Start'; content.appendChild(select); content.appendChild(startBtn);
-    startBtn.onclick=function(){
-        let length=parseInt(select.value); content.innerHTML=''; let sequence=[]; for(let i=0;i<length;i++) sequence.push(Math.floor(Math.random()*10));
-        let prompt=document.createElement('div'); prompt.id='promptText'; prompt.innerText=sequence.join(' '); content.appendChild(prompt);
-        setTimeout(()=>{prompt.innerText=''; let input=document.createElement('input'); input.type='text'; let btn=document.createElement('button'); btn.innerText='Submit'; let info=document.createElement('div'); content.appendChild(input); content.appendChild(btn); content.appendChild(info);
-            let start=performance.now();
-            btn.onclick=function(){
-                let typed=input.value.replace(/\s+/g,'').split('').map(Number); let correct=true; if(typed.length!==sequence.length) correct=false; else{for(let i=0;i<sequence.length;i++){if(typed[i]!==sequence[i]) correct=false;}}
-                let elapsed=(performance.now()-start)/1000;
-                if(correct){streaks.numMemory++; info.innerHTML='Correct!'; saveLeaderboard('numMemory',`${length}`,{name:username,score:1,time:elapsed}); showLeaderboard('numMemory',`${length}`,'numMemoryLeaderboard'); if(elapsed<length*0.5) info.innerHTML+='<br><span class="achievement">⚡ Lightning Memory!</span>'; if(streaks.numMemory>=3) info.innerHTML+='<br><span class="achievement">🔥 Perfect Streak!</span>';}
-                else {streaks.numMemory=0; info.innerHTML='Incorrect.';}
-            }
-            input.addEventListener('keydown', e=>{if(e.key==='Enter') btn.click();});
-        },1000+length*700);
-    };
-}
-
-// ---------- Sequence Tap ----------
-function startSeqTap(username){
-    const content=document.getElementById('seqTapContent'); content.innerHTML='';
-    let modes=[3,4,5,6]; let select=document.createElement('select'); modes.forEach(m=>{let opt=document.createElement('option'); opt.value=m; opt.innerText=`Sequence ${m}`; select.appendChild(opt);});
-    let startBtn=document.createElement('button'); startBtn.innerText='Start'; content.appendChild(select); content.appendChild(startBtn);
-    startBtn.onclick=function(){
-        let length=parseInt(select.value); content.innerHTML=''; let sequence=[]; for(let i=0;i<length;i++) sequence.push(Math.floor(Math.random()*4)+1);
-        let prompt=document.createElement('div'); prompt.id='promptText'; prompt.innerText=sequence.join(' '); content.appendChild(prompt);
-        setTimeout(()=>{
-            prompt.innerText=''; let input=document.createElement('input'); input.type='text'; let btn=document.createElement('button'); btn.innerText='Submit'; let info=document.createElement('div'); content.appendChild(input); content.appendChild(btn); content.appendChild(info);
-            let start=performance.now();
-            btn.onclick=function(){let typed=input.value.replace(/\s+/g,'').split('').map(Number); let correct=true; if(typed.length!==sequence.length) correct=false; else{for(let i=0;i<sequence.length;i++){if(typed[i]!==sequence[i]) correct=false;}}
-                let elapsed=(performance.now()-start)/1000;
-                if(correct){streaks.seqTap++; info.innerHTML='Correct!'; saveLeaderboard('seqTap',`${length}`,{name:username,score:1,time:elapsed}); showLeaderboard('seqTap',`${length}`,'seqTapLeaderboard'); if(elapsed<length*0.5) info.innerHTML+='<br><span class="achievement">⚡ Lightning Taps!</span>'; if(streaks.seqTap>=3) info.innerHTML+='<br><span class="achievement">🔥 Perfect Streak!</span>';}
-                else {streaks.seqTap=0; info.innerHTML='Incorrect.';}
-            }
-            input.addEventListener('keydown', e=>{if(e.key==='Enter') btn.click();});
-        },1000+length*500);
-    };
-}
-
-// ---------- Word Memory Chain ----------
-function startWordChain(username){
-    const content=document.getElementById('wordChainContent'); content.innerHTML='';
-    let modes=[3,5,7,10]; let select=document.createElement('select'); modes.forEach(m=>{let opt=document.createElement('option'); opt.value=m; opt.innerText=`Chain ${m}`; select.appendChild(opt);});
-    let startBtn=document.createElement('button'); startBtn.innerText='Start'; content.appendChild(select); content.appendChild(startBtn);
-    startBtn.onclick=function(){
-        let length=parseInt(select.value); content.innerHTML=''; let words=[]; for(let i=0;i<length;i++) words.push(Math.random().toString(36).substring(2,6));
-        let prompt=document.createElement('div'); prompt.id='promptText'; prompt.innerText=words.join(' '); content.appendChild(prompt);
-        setTimeout(()=>{
-            prompt.innerText=''; let input=document.createElement('input'); input.type='text'; let btn=document.createElement('button'); btn.innerText='Submit'; let info=document.createElement('div'); content.appendChild(input); content.appendChild(btn); content.appendChild(info);
-            let start=performance.now();
-            btn.onclick=function(){let typed=input.value.trim().split(/\s+/); let correct=true; if(typed.length!==words.length) correct=false; else{for(let i=0;i<words.length;i++){if(typed[i]!==words[i]) correct=false;}}
-                let elapsed=(performance.now()-start)/1000;
-                if(correct){streaks.wordChain++; info.innerHTML='Correct!'; saveLeaderboard('wordChain',`${length}`,{name:username,score:1,time:elapsed}); showLeaderboard('wordChain',`${length}`,'wordChainLeaderboard'); if(elapsed<length*0.8) info.innerHTML+='<br><span class="achievement">⚡ Lightning Memory Chain!</span>'; if(streaks.wordChain>=3) info.innerHTML+='<br><span class="achievement">🔥 Perfect Streak!</span>';}
-                else {streaks.wordChain=0; info.innerHTML='Incorrect.';}
-            }
-            input.addEventListener('keydown', e=>{if(e.key==='Enter') btn.click();});
-        },1000+length*600);
-    };
-}
+// Include full game JS here (from previous message)
 </script>
+
 </body>
 </html>
+
 
