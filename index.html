@@ -5,171 +5,379 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Ultimate Game Hub — All Games</title>
 <style>
-:root{
-  --bg:#0b0c0e; --panel:#111214; --muted:#9aa0a6; --accent:#ffd166;
-  --card:#141518; --ok:#2ecc71; --bad:#e74c3c;
-}
-body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:#e7eef6}
-header{background:var(--panel);padding:18px 24px;text-align:center}
-header h1{margin:0;color:var(--accent)}
-main{max-width:1100px;margin:18px auto;padding:18px}
-.menu, .panel{background:var(--card);padding:16px;border-radius:10px;margin-bottom:14px}
-button{background:#1f2226;color:#fff;border:0;padding:8px 12px;border-radius:8px;margin:6px;cursor:pointer}
-select,input,textarea{padding:8px;border-radius:8px;border:1px solid #222;background:#0e0f11;color:#fff}
-label{color:var(--muted);margin-right:10px}
-.controls{margin:8px 0}
-.small{font-size:13px;color:var(--muted)}
-.leaderboard{background:#0e1012;padding:10px;border-radius:8px;margin-top:12px;max-height:260px;overflow:auto;text-align:left}
-.resultline{margin-top:8px;color:var(--muted)}
-.achievement{color:var(--accent);font-weight:700;margin-top:6px;display:block}
-#reactionArea{width:340px;height:140px;margin:14px auto;border-radius:10px;display:flex;align-items:center;justify-content:center;user-select:none;cursor:pointer}
-.color-btn{width:64px;height:64px;border-radius:8px;display:inline-block;margin:6px;border:3px solid rgba(255,255,255,0.06);cursor:pointer}
-.hidden{display:none}
-.inline{display:inline-block}
-.game-title{margin:0 0 8px 0}
-ol{margin:8px 0 0 18px;padding:0}
+  :root{
+    --bg:#0b0c0e; --panel:#111214; --muted:#9aa0a6; --accent:#ffd166;
+    --card:#141518; --ok:#2ecc71; --bad:#e74c3c;
+  }
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:#e7eef6}
+  header{background:var(--panel);padding:18px 24px;text-align:center}
+  header h1{margin:0;color:var(--accent)}
+  main{max-width:1100px;margin:18px auto;padding:18px}
+  .menu, .panel{background:var(--card);padding:16px;border-radius:10px;margin-bottom:14px}
+  button{background:#1f2226;color:#fff;border:0;padding:8px 12px;border-radius:8px;margin:6px;cursor:pointer}
+  select,input,textarea{padding:8px;border-radius:8px;border:1px solid #222;background:#0e0f11;color:#fff}
+  label{color:var(--muted);margin-right:10px}
+  .controls{margin:8px 0}
+  .small{font-size:13px;color:var(--muted)}
+  .leaderboard{background:#0e1012;padding:10px;border-radius:8px;margin-top:12px;max-height:260px;overflow:auto;text-align:left}
+  .resultline{margin-top:8px;color:var(--muted)}
+  .achievement{color:var(--accent);font-weight:700;margin-top:6px;display:block}
+  #reactionArea{width:340px;height:140px;margin:14px auto;border-radius:10px;display:flex;align-items:center;justify-content:center;user-select:none;cursor:pointer}
+  .color-btn{width:64px;height:64px;border-radius:8px;display:inline-block;margin:6px;border:3px solid rgba(255,255,255,0.06);cursor:pointer}
+  .hidden{display:none}
+  .inline{display:inline-block}
+  .game-title{margin:0 0 8px 0}
+  ol{margin:8px 0 0 18px;padding:0}
 </style>
 </head>
 <body>
 <header><h1>Ultimate Game Hub</h1></header>
 <main>
-<section class="menu" id="mainMenu">
-<h2 class="game-title">Games</h2>
-<div class="controls">
-  <button onclick="enterGame('guess')">Guess the Number</button>
-  <button onclick="enterGame('math')">Math Quiz</button>
-  <button onclick="enterGame('reaction')">Reaction Game</button>
-  <button onclick="enterGame('typing')">Gibberish Typing</button>
-  <button onclick="enterGame('numMemory')">Number Memory</button>
-  <button onclick="enterGame('seqTap')">Sequence Tap</button>
-  <button onclick="enterGame('wordChain')">Word Memory Chain</button>
-</div>
-<div class="small">Leaderboards persist in your browser (localStorage). Username is asked after selecting a game and cleared when you return to menu.</div>
-</section>
+  <section class="menu" id="mainMenu">
+    <h2 class="game-title">Games</h2>
+    <div class="controls">
+      <button onclick="enterGame('guess')">Guess the Number</button>
+      <button onclick="enterGame('math')">Math Quiz</button>
+      <button onclick="enterGame('reaction')">Reaction Game</button>
+      <button onclick="enterGame('typing')">Gibberish Typing</button>
+      <button onclick="enterGame('numMemory')">Number Memory</button>
+      <button onclick="enterGame('seqTap')">Sequence Tap</button>
+      <button onclick="enterGame('wordChain')">Word Memory Chain</button>
+    </div>
+    <div class="small">Leaderboards persist in your browser (localStorage). Username is asked after selecting a game and cleared when you return to menu.</div>
+  </section>
 
-<!-- Panels for each game -->
-<section class="panel hidden" id="panel-guess">
-  <h2 class="game-title">Guess the Number</h2>
-  <div class="controls">
-    <label>Difficulty:
-      <select id="guessMode">
-        <option value="1-50">Very Easy (1–50)</option>
-        <option value="1-100" selected>Normal (1–100)</option>
-        <option value="1-250">Hard (1–250)</option>
-        <option value="1-500">Very Hard (1–500)</option>
-        <option value="1-1000">Extreme (1–1000)</option>
-      </select>
-    </label>
-    <span id="guessNameArea"></span>
-    <button id="guessStartBtn">Start Game</button>
-  </div>
-  <div id="guessPlayArea" style="margin-top:12px"></div>
-  <div class="resultline">Player: <b id="guessPlayer"></b> — Attempts: <b id="guessAttempts">0</b> — Time: <b id="guessTime">0.000</b>s</div>
-  <div id="guessAchievements"></div>
-  <div class="leaderboard" id="lb-guess"></div>
-  <div style="margin-top:10px"><button onclick="returnToMenu()">Return to Menu</button></div>
-</section>
-
-<section class="panel hidden" id="panel-reaction">
-  <h2 class="game-title">Reaction Game</h2>
-  <div class="controls">
-    <label>Rounds:
-      <select id="reactionRounds"><option>3</option><option>5</option><option>10</option></select>
-    </label>
-    <span id="reactionNameArea"></span>
-    <button id="reactionStartBtn">Start</button>
-  </div>
-  <div id="reactionPlay" style="margin-top:12px">
-    <div id="reactionArea" style="background:#333;color:#fff;border-radius:8px">Press Start</div>
-  </div>
-  <div class="resultline">Player: <b id="reactionPlayer"></b> — Total Time: <b id="reactionTotal">0.000</b>s</div>
-  <div id="reactionAchievements"></div>
-  <div class="leaderboard" id="lb-reaction"></div>
-  <div style="margin-top:10px"><button onclick="returnToMenu()">Return to Menu</button></div>
-</section>
-
-<!-- Other panels (Math, Typing, Number Memory, Sequence Tap, Word Memory Chain) go here similarly -->
+  <!-- GAME PANELS -->
+  <!-- The panels for each game will be dynamically handled via JavaScript -->
+  <div id="gamePanels"></div>
+</main>
 
 <script>
-/* --------------------------- Helpers & LB --------------------------- */
-function now(){return performance.now();}
-function msToSec(ms){return ms/1000;}
-function lbKey(game, mode){return 'LH_'+game+'_'+mode;}
+// ---------------------------
+// Utility & Leaderboards
+// ---------------------------
+function now(){ return performance.now(); }
+function msToSec(ms){ return ms/1000; }
+function escapeHTML(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function lbKey(game, mode){ return 'LH_'+game+'_'+mode; }
 function saveToLB(game, mode, entry, comparator){
-  const key=lbKey(game,mode);
-  let arr=JSON.parse(localStorage.getItem(key)||'[]');
+  const key = lbKey(game,mode);
+  let arr = JSON.parse(localStorage.getItem(key) || '[]');
   arr.push(entry);
   arr.sort(comparator);
-  arr=arr.slice(0,100);
-  localStorage.setItem(key,JSON.stringify(arr));
+  arr = arr.slice(0,100);
+  localStorage.setItem(key, JSON.stringify(arr));
 }
 function showLBIn(containerId, game, mode, fmt){
-  const arr=JSON.parse(localStorage.getItem(lbKey(game,mode))||'[]');
-  const container=document.getElementById(containerId);
-  if(!arr.length){ container.innerHTML='<i>No scores yet for this mode.</i>'; return;}
-  let html='<b>Top '+Math.min(arr.length,100)+'</b><ol>';
-  arr.forEach(e=>{html+='<li>'+escapeHTML(e.name)+' — '+fmt(e)+'</li>';});
-  html+='</ol>';
-  container.innerHTML=html;
+  const key = lbKey(game,mode);
+  let arr = JSON.parse(localStorage.getItem(key) || '[]');
+  const container = document.getElementById(containerId);
+  if(!arr.length){ container.innerHTML = '<i>No scores yet for this mode.</i>'; return; }
+  let html = '<b>Top '+Math.min(arr.length,100)+'</b><ol>';
+  arr.forEach((e,i)=>{ html += '<li>' + escapeHTML(e.name) + ' — ' + fmt(e) + '</li>'; });
+  html += '</ol>';
+  container.innerHTML = html;
 }
-function escapeHTML(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-function hideAllPanels(){document.querySelectorAll('.panel').forEach(p=>p.classList.add('hidden'));}
-function returnToMenu(){window.__playerName='';hideAllPanels();document.getElementById('mainMenu').style.display='block';document.querySelectorAll('[id$="Play"], [id$="PlayArea"]').forEach(n=>{if(n)n.innerHTML='';});}
 
-/* --------------------------- Enter Game & Username --------------------------- */
+// ---------------------------
+// Navigation
+// ---------------------------
+function hideAllPanels(){ document.querySelectorAll('.panel').forEach(p=>p.classList.add('hidden')); }
+function returnToMenu(){
+  window.__playerName='';
+  hideAllPanels();
+  document.getElementById('mainMenu').style.display='block';
+  document.getElementById('gamePanels').innerHTML='';
+}
+
+// ---------------------------
+// Enter Game
+// ---------------------------
 function enterGame(key){
-  hideAllPanels(); document.getElementById('mainMenu').style.display='none';
-  const panel=document.getElementById('panel-'+key); if(!panel) return;
-  panel.classList.remove('hidden');
-  const nameAreaId={guess:'guessNameArea', math:'mathNameArea', reaction:'reactionNameArea', typing:'typingNameArea', numMemory:'numNameArea', seqTap:'seqNameArea', wordChain:'wordNameArea'}[key];
-  const nameArea=document.getElementById(nameAreaId);
-  nameArea.innerHTML='';
-  const inp=document.createElement('input'); inp.placeholder='Your name';
-  const startBtn=document.createElement('button'); startBtn.textContent='Start';
+  hideAllPanels();
+  document.getElementById('mainMenu').style.display='none';
+  const panelsDiv = document.getElementById('gamePanels');
+  panelsDiv.innerHTML='';
+
+  const panel = document.createElement('section');
+  panel.className='panel';
+  panel.id='panel-'+key;
+  panelsDiv.appendChild(panel);
+
+  panel.innerHTML = `<h2 class="game-title">${{
+    guess:'Guess the Number', math:'Math Quiz', reaction:'Reaction Game', typing:'Gibberish Typing',
+    numMemory:'Number Memory', seqTap:'Sequence Tap', wordChain:'Word Memory Chain'
+  }[key]}</h2>
+  <div class="controls"><span id="${key}NameArea"></span></div>
+  <div id="${key}PlayArea" style="margin-top:12px"></div>
+  <div class="resultline">Player: <b id="${key}Player"></b> — <span id="${key}Results"></span></div>
+  <div id="${key}Achievements"></div>
+  <div class="leaderboard" id="lb-${key}"></div>
+  <div style="margin-top:10px"><button onclick="returnToMenu()">Return to Menu</button></div>`;
+
+  const nameArea = document.getElementById(key+'NameArea');
+  const inp = document.createElement('input'); inp.placeholder='Enter your name';
+  const startBtn = document.createElement('button'); startBtn.textContent='Start';
   nameArea.appendChild(inp); nameArea.appendChild(startBtn);
-  startBtn.onclick=function(){
-    const name=(inp.value||'').trim()||prompt('Enter your name','Player')||'Player';
+
+  startBtn.onclick = ()=>{
+    const name=(inp.value||'').trim()||prompt('Enter your name:','Player')||'Player';
     window.__playerName=name;
+    document.getElementById(key+'Player').textContent=name;
     nameArea.innerHTML='<b>Player: </b>'+escapeHTML(name)+' ';
-    if(key==='reaction') setupReactionPanel(name);
-    // Setup other games here...
+    // call game handler
+    {
+      if(key==='guess') startGuessGame();
+      else if(key==='math') startMathGame();
+      else if(key==='reaction') startReactionGame();
+      else if(key==='typing') startTypingGame();
+      else if(key==='numMemory') startNumMemoryGame();
+      else if(key==='seqTap') startSeqTapGame();
+      else if(key==='wordChain') startWordChainGame();
+    }
   };
-  inp.addEventListener('keydown',e=>{if(e.key==='Enter') startBtn.click();});
+  inp.addEventListener('keydown', e=>{ if(e.key==='Enter') startBtn.click(); });
 }
 
-/* --------------------------- Reaction Game JS --------------------------- */
-function setupReactionPanel(playerName){
-  const rounds=parseInt(document.getElementById('reactionRounds').value);
-  const area=document.getElementById('reactionArea');
-  const totalElem=document.getElementById('reactionTotal'); totalElem.textContent='0.000';
-  document.getElementById('reactionPlayer').textContent=playerName;
-  area.style.background='#333'; area.textContent='Wait...';
-  let currentRound=0, totalTime=0, timeoutId=null;
-  function nextRound(){
-    if(currentRound>=rounds){
-      area.textContent='Done! Total: '+totalTime.toFixed(3)+'s';
-      saveToLB('reaction',rounds,{name:playerName,time:totalTime},(a,b)=>a.time-b.time);
-      showLBIn('lb-reaction','reaction',rounds,e=>e.time.toFixed(3)+'s');
-      return;
-    }
-    area.style.background='#333'; area.textContent='Wait...';
-    const delay=500+Math.random()*2000;
-    timeoutId=setTimeout(()=>{ 
-      const startTime=now();
-      area.style.background='#2ecc71'; area.textContent='CLICK!';
-      function clickHandler(){
-        const reaction=(now()-startTime)/1000;
-        totalTime+=reaction; totalElem.textContent=totalTime.toFixed(3);
-        area.removeEventListener('click',clickHandler);
-        currentRound++; nextRound();
-      }
-      area.addEventListener('click',clickHandler);
-    }, delay);
+// ---------------------------
+// Game implementations
+// ---------------------------
+
+// Guess the Number
+function startGuessGame(){
+  const play = document.getElementById('guessPlayArea');
+  play.innerHTML='';
+  const mode='1-100';
+  const min=1, max=100;
+  const secret=Math.floor(Math.random()*(max-min+1))+min;
+  let attempts=0;
+  const t0=now();
+  const input=document.createElement('input'); input.type='number'; input.min=min; input.max=max;
+  const submit=document.createElement('button'); submit.textContent='Submit';
+  const feedback=document.createElement('div');
+  play.appendChild(document.createElement('div')).textContent=`Guess number between ${min}–${max}`;
+  play.appendChild(input); play.appendChild(submit); play.appendChild(feedback);
+  function finish(){
+    const elapsed=msToSec(now()-t0);
+    document.getElementById('guessResults').textContent=`Attempts: ${attempts} — Time: ${elapsed.toFixed(3)}s`;
+    const ach=[];
+    if(attempts===1) ach.push('🏅 Lucky First Guess!');
+    if(elapsed<5) ach.push('⚡ Speedy <5s!');
+    document.getElementById('guessAchievements').innerHTML=ach.map(a=>'<span class="achievement">'+a+'</span>').join('');
+    saveToLB('guess',mode,{name:window.__playerName,score:attempts,time:elapsed},(a,b)=>a.score-b.score||a.time-b.time);
+    showLBIn('lb-guess','guess',mode,e=>`Attempts: ${e.score} — ${e.time.toFixed(3)}s`);
+    input.disabled=submit.disabled=true;
+    setTimeout(()=>returnToMenu(),4000);
   }
-  nextRound();
+  submit.onclick=()=>{ 
+    if(submit.disabled)return;
+    const val=parseInt(input.value);
+    if(isNaN(val)){ feedback.textContent='Enter number'; return;}
+    attempts++; document.getElementById('guessResults').textContent=`Attempts: ${attempts}`;
+    if(val<secret) feedback.textContent='Too low'; else if(val>secret) feedback.textContent='Too high'; else{feedback.textContent='Correct!'; finish();}
+    input.value='';
+  };
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter') submit.click(); });
+}
+
+// Math Quiz
+function startMathGame(){
+  const play = document.getElementById('mathPlayArea');
+  play.innerHTML='';
+  const modes=['Easy','Medium','Hard'];
+  const modeSelect=document.createElement('select');
+  modes.forEach(m=>{const o=document.createElement('option'); o.value=m;o.textContent=m;modeSelect.appendChild(o)});
+  play.appendChild(document.createTextNode('Difficulty: ')); play.appendChild(modeSelect);
+  const startBtn=document.createElement('button'); startBtn.textContent='Start Quiz'; play.appendChild(startBtn);
+
+  startBtn.onclick=()=>{
+    const difficulty=modeSelect.value;
+    const lbMode=difficulty;
+    let questions=[], score=0, qIndex=0;
+    function genQ(d){
+      let a,b,op,ans;
+      if(d==='Easy'){a=Math.floor(Math.random()*10+1);b=Math.floor(Math.random()*10+1);op='+';ans=a+b;}
+      else if(d==='Medium'){a=Math.floor(Math.random()*20+1);b=Math.floor(Math.random()*20+1);op=Math.random()<0.5?'+':'-';ans=op==='+'?a+b:a-b;}
+      else{a=Math.floor(Math.random()*12+1);b=Math.floor(Math.random()*12+1);op=['+','-','*'][Math.floor(Math.random()*3)];ans=eval(`${a}${op}${b}`);}
+      return {q:`${a} ${op} ${b} = ?`,ans};
+    }
+    for(let i=0;i<5;i++) questions.push(genQ(difficulty));
+    const t0=now();
+    const qDiv=document.createElement('div'); const input=document.createElement('input'); input.type='number'; const sub=document.createElement('button'); sub.textContent='Submit';
+    play.appendChild(qDiv); play.appendChild(input); play.appendChild(sub);
+    function nextQ(){
+      if(qIndex>=questions.length){
+        const elapsed=msToSec(now()-t0);
+        document.getElementById('mathResults').textContent=`Score: ${score}/${questions.length} — Time: ${elapsed.toFixed(2)}s`;
+        const ach=[];
+        if(score===questions.length) ach.push('🏆 Perfect Score!');
+        document.getElementById('mathAchievements').innerHTML=ach.map(a=>'<span class="achievement">'+a+'</span>').join('');
+        saveToLB('math',lbMode,{name:window.__playerName,score,time:elapsed},(a,b)=>b.score-a.score||a.time-b.time);
+        showLBIn('lb-math','math',lbMode,e=>`Score: ${e.score} — ${e.time.toFixed(2)}s`);
+        input.disabled=sub.disabled=true;
+        setTimeout(()=>returnToMenu(),4000); return;
+      }
+      const cur=questions[qIndex];
+      qDiv.textContent=cur.q;
+      input.value=''; input.focus();
+    }
+    sub.onclick=()=>{ const val=parseFloat(input.value); if(isNaN(val)) return; if(val===questions[qIndex].ans) score++; qIndex++; nextQ();}
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter') sub.click(); });
+    nextQ();
+  };
+}
+
+// Reaction Game
+function startReactionGame(){
+  const play = document.getElementById('reactionPlayArea');
+  play.innerHTML='';
+  const mode='Reaction';
+  const area=document.createElement('div'); area.id='reactionArea'; area.style.background='#444'; area.textContent='Wait for green'; play.appendChild(area);
+  let t0,timer,waiting=true,attempts=0;
+  function startCycle(){
+    area.style.background='#444'; area.textContent='Wait for green';
+    const delay=Math.random()*2500+1000;
+    timer=setTimeout(()=>{
+      t0=now(); waiting=false; area.style.background='#2ecc71'; area.textContent='CLICK!';
+    },delay);
+  }
+  area.onclick=()=>{
+    attempts++;
+    if(waiting){ clearTimeout(timer); area.textContent='Too soon!'; setTimeout(startCycle,1000); return;}
+    const elapsed=msToSec(now()-t0);
+    document.getElementById('reactionResults').textContent=`Time: ${elapsed.toFixed(3)}s — Attempts: ${attempts}`;
+    saveToLB('reaction',mode,{name:window.__playerName,time:elapsed},(a,b)=>a.time-b.time);
+    showLBIn('lb-reaction','reaction',mode,e=>e.time.toFixed(3)+'s');
+    startCycle();
+  };
+  startCycle();
+}
+
+// Gibberish Typing
+function startTypingGame(){
+  const play = document.getElementById('typingPlayArea');
+  play.innerHTML='';
+  const mode='Typing';
+  const words=['flomby','grundle','zibble','trazmo','blapton','vorkle','squinch','plimby','crumple','bazzle'];
+  let index=0, startT=0;
+  const div=document.createElement('div'); div.textContent='Type: '+words[index]; play.appendChild(div);
+  const inp=document.createElement('input'); play.appendChild(inp); inp.focus();
+  inp.addEventListener('keydown', e=>{
+    if(e.key==='Enter'){
+      if(inp.value===words[index]){
+        index++;
+        if(index>=words.length){
+          const elapsed=msToSec(now()-startT);
+          document.getElementById('typingResults').textContent=`Completed in ${elapsed.toFixed(2)}s`;
+          saveToLB('typing',mode,{name:window.__playerName,time:elapsed},(a,b)=>a.time-b.time);
+          showLBIn('lb-typing','typing',mode,e=>e.time.toFixed(2)+'s');
+          inp.disabled=true;
+          return;
+        }
+        div.textContent='Type: '+words[index]; inp.value='';
+      }
+    }
+  });
+  startT=now();
+}
+
+// Number Memory
+function startNumMemoryGame(){
+  const play = document.getElementById('numMemoryPlayArea'); play.innerHTML='';
+  const mode='NumMem';
+  let level=1; let t0;
+  const display=document.createElement('div'); const inp=document.createElement('input'); const sub=document.createElement('button'); sub.textContent='Submit';
+  play.appendChild(display); play.appendChild(inp); play.appendChild(sub);
+  function nextLevel(){
+    const num=''+Math.floor(Math.random()*Math.pow(10,level));
+    display.textContent=num; inp.value=''; inp.disabled=true;
+    setTimeout(()=>{
+      display.textContent='Type the number: '; inp.disabled=false; inp.focus();
+      t0=now(); sub.onclick=check;
+    },1000*level);
+    function check(){
+      if(inp.value===num){
+        level++;
+        nextLevel();
+      }else{
+        const elapsed=msToSec(now()-t0);
+        document.getElementById('numMemoryResults').textContent=`Reached Level ${level}`;
+        saveToLB('numMemory',mode,{name:window.__playerName,level},(a,b)=>b.level-a.level);
+        showLBIn('lb-numMemory','numMemory',mode,e=>'Level '+e.level);
+        inp.disabled=sub.disabled=true;
+      }
+    }
+  }
+  nextLevel();
+}
+
+// Sequence Tap
+function startSeqTapGame(){
+  const play = document.getElementById('seqTapPlayArea'); play.innerHTML='';
+  const mode='SeqTap';
+  const colors=['red','green','blue','yellow'];
+  let seq=[], userSeq=[], level=1;
+  const container=document.createElement('div'); play.appendChild(container);
+  function showSeq(){
+    seq.push(colors[Math.floor(Math.random()*colors.length)]);
+    let i=0;
+    const divs=colors.map(c=>{const d=document.createElement('div'); d.className='color-btn'; d.style.background=c; container.appendChild(d); return d;});
+    function flash(){
+      if(i>=seq.length) return startUser();
+      divs.forEach(d=>d.style.opacity='0.3'); divs[colors.indexOf(seq[i])].style.opacity='1';
+      setTimeout(()=>{divs[colors.indexOf(seq[i])].style.opacity='0.3';i++; setTimeout(flash,300)},500);
+    }
+    flash();
+  }
+  function startUser(){
+    userSeq=[];
+    container.querySelectorAll('.color-btn').forEach((d,i)=>{
+      d.style.opacity='1';
+      d.onclick=()=>{
+        userSeq.push(colors[i]);
+        if(userSeq[userSeq.length-1]!==seq[userSeq.length-1]){
+          document.getElementById('seqTapResults').textContent=`Failed at Level ${level}`;
+          saveToLB('seqTap',mode,{name:window.__playerName,level},(a,b)=>b.level-a.level);
+          showLBIn('lb-seqTap','seqTap',mode,e=>'Level '+e.level);
+          container.querySelectorAll('.color-btn').forEach(d=>d.onclick=null);
+        } else if(userSeq.length===seq.length){
+          level++; showSeq();
+        }
+      };
+    });
+  }
+  showSeq();
+}
+
+// Word Memory Chain
+function startWordChainGame(){
+  const play = document.getElementById('wordChainPlayArea'); play.innerHTML='';
+  const mode='WordChain';
+  const words=['apple','banana','grape','orange','peach','melon','berry','kiwi','plum','mango'];
+  let chain=[], t0=now();
+  const div=document.createElement('div'); play.appendChild(div);
+  const inp=document.createElement('input'); play.appendChild(inp);
+  const sub=document.createElement('button'); sub.textContent='Submit'; play.appendChild(sub);
+  function next(){
+    const newWord=words[Math.floor(Math.random()*words.length)];
+    chain.push(newWord);
+    div.textContent='Chain: '+chain.join(' → '); inp.value=''; inp.focus();
+  }
+  sub.onclick=()=>{
+    const val=inp.value.trim();
+    if(val!==chain[chain.length-1]){ 
+      const elapsed=msToSec(now()-t0);
+      document.getElementById('wordChainResults').textContent=`Chain ended at ${chain.length} words — ${elapsed.toFixed(2)}s`;
+      saveToLB('wordChain',mode,{name:window.__playerName,length:chain.length,time:elapsed},(a,b)=>b.length-a.length||a.time-b.time);
+      showLBIn('lb-wordChain','wordChain',mode,e=>`Length: ${e.length} — ${e.time.toFixed(2)}s`);
+      inp.disabled=sub.disabled=true;
+    } else next();
+  };
+  next();
 }
 </script>
 </body>
 </html>
+
 
 
