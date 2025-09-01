@@ -1,173 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Game Hub</title>
-<style>
-body { font-family: Arial, sans-serif; background: #111; color: #eee; margin:0; padding:0; }
-header { padding:20px; text-align:center; background:#222; }
-main { padding:20px; }
-button { padding:10px 15px; margin:5px; cursor:pointer; }
-.game-container { display:none; margin-top:20px; }
-.leaderboard { margin-top:10px; background:#222; padding:10px; max-height:200px; overflow:auto; }
-.color-button { display:inline-block; width:50px; height:50px; margin:5px; cursor:pointer; }
-input { padding:5px; }
-</style>
+  <meta charset="UTF-8">
+  <title>Ultimate Browser Arcade</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align:center; background:#111; color:#eee; }
+    button { margin:8px; padding:10px 20px; font-size:16px; }
+    input { padding:6px; margin:6px; font-size:16px; }
+    #gameArea { margin-top:20px; }
+    .leaderboard { margin-top:20px; text-align:left; display:inline-block; background:#222; padding:10px; border-radius:10px; }
+    .achievement { color:gold; font-weight:bold; }
+    .colorBox { display:inline-block; width:50px; height:50px; margin:5px; border:2px solid #fff; }
+  </style>
 </head>
 <body>
-<header><h1>🎮 Game Hub</h1></header>
-<main>
-<div>
-<label>Enter your name: <input type="text" id="usernameInput"></label>
-<button onclick="setUsername()">Confirm Name</button>
+<h1>Ultimate Browser Arcade</h1>
+<div id="menu">
+  <button onclick="chooseUsername('guessNumber')">Guess the Number</button>
+  <button onclick="chooseUsername('mathQuiz')">Math Quiz</button>
+  <button onclick="chooseUsername('reaction')">Reaction Game</button>
+  <button onclick="chooseUsername('gibberish')">Gibberish Typing</button>
+  <button onclick="chooseUsername('numMemory')">Number Memory</button>
+  <button onclick="chooseUsername('seqTap')">Sequence Tap</button>
+  <button onclick="chooseUsername('wordChain')">Word Memory Chain</button>
 </div>
-
-<div id="gameSelection" style="margin-top:20px; display:none;">
-<h2>Select a Game</h2>
-<button onclick="startGame('guessNumber')">Guess the Number</button>
-<button onclick="startGame('mathQuiz')">Math Quiz</button>
-<button onclick="startGame('reaction')">Reaction Game</button>
-<button onclick="startGame('typing')">Gibberish Typing</button>
-<button onclick="startGame('numMemory')">Number Memory</button>
-<button onclick="startGame('seqTap')">Sequence Tap</button>
-<button onclick="startGame('wordChain')">Word Memory Chain</button>
-</div>
-
-<!-- Guess Number -->
-<div id="guessNumber" class="game-container">
-<h3>Guess the Number</h3>
-<div>Name: <span id="guessNumberName"></span></div>
-<div>Attempts: <span id="guessNumberAttempts"></span></div>
-<div>Time: <span id="guessNumberTime"></span></div>
-<div id="guessNumberAchievements"></div>
-<div id="guessNumberContent"></div>
-<div class="leaderboard" id="guessNumberLeaderboard"></div>
-<button onclick="backToMenu()">Back to Menu</button>
-</div>
-
-<!-- Math Quiz -->
-<div id="mathQuiz" class="game-container">
-<h3>Math Quiz</h3>
-<div>Name: <span id="mathQuizName"></span></div>
-<div>Score: <span id="mathQuizScore"></span></div>
-<div>Time: <span id="mathQuizTime"></span></div>
-<div id="mathQuizAchievements"></div>
-<div id="mathQuizContent"></div>
-<div class="leaderboard" id="mathQuizLeaderboard"></div>
-<button onclick="backToMenu()">Back to Menu</button>
-</div>
-
-<!-- Reaction -->
-<div id="reaction" class="game-container">
-<h3>Reaction Game</h3>
-<div>Name: <span id="reactionName"></span></div>
-<div>Time: <span id="reactionTimeDisplay"></span></div>
-<div id="reactionAchievements"></div>
-<div id="reactionContent"></div>
-<div class="leaderboard" id="reactionLeaderboard"></div>
-<button onclick="backToMenu()">Back to Menu</button>
-</div>
-
-<!-- Gibberish Typing -->
-<div id="typing" class="game-container">
-<h3>Gibberish Typing</h3>
-<div>Name: <span id="typingName"></span></div>
-<div>Time: <span id="typingTimeDisplay"></span></div>
-<div id="typingAchievements"></div>
-<div id="typingContent"></div>
-<input type="text" id="typingInput" placeholder="Type here...">
-<div class="leaderboard" id="typingLeaderboard"></div>
-<button onclick="backToMenu()">Back to Menu</button>
-</div>
-
-<!-- Number Memory -->
-<div id="numMemory" class="game-container">
-<h3>Number Memory</h3>
-<div>Name: <span id="numMemoryName"></span></div>
-<div>Time: <span id="numMemoryTimeDisplay"></span></div>
-<div id="numMemoryAchievements"></div>
-<div id="numMemoryContent"></div>
-<div class="leaderboard" id="numMemoryLeaderboard"></div>
-<button onclick="backToMenu()">Back to Menu</button>
-</div>
-
-<!-- Sequence Tap -->
-<div id="seqTap" class="game-container">
-<h3>Sequence Tap</h3>
-<div>Name: <span id="seqTapName"></span></div>
-<div>Time: <span id="seqTapTimeDisplay"></span></div>
-<div id="seqTapAchievements"></div>
-<div id="seqTapContent"></div>
-<div class="leaderboard" id="seqTapLeaderboard"></div>
-<button onclick="backToMenu()">Back to Menu</button>
-</div>
-
-<!-- Word Memory Chain -->
-<div id="wordChain" class="game-container">
-<h3>Word Memory Chain</h3>
-<div>Name: <span id="wordChainName"></span></div>
-<div>Time: <span id="wordChainTimeDisplay"></span></div>
-<div id="wordChainAchievements"></div>
-<div id="wordChainContent"></div>
-<div class="leaderboard" id="wordChainLeaderboard"></div>
-<button onclick="backToMenu()">Back to Menu</button>
-</div>
-
-</main>
+<div id="gameArea"></div>
 
 <script>
-let username='';
-function setUsername(){
-    username=document.getElementById('usernameInput').value.trim()||'Player';
-    document.getElementById('gameSelection').style.display='block';
+// =============== Global Storage ===============
+let leaderboard = JSON.parse(localStorage.getItem("arcadeLeaderboard") || "{}");
+function saveLeaderboard(game, mode, entry) {
+  if (!leaderboard[game]) leaderboard[game] = {};
+  if (!leaderboard[game][mode]) leaderboard[game][mode] = [];
+  leaderboard[game][mode].push(entry);
+  if (game === "guessNumber") {
+    leaderboard[game][mode].sort((a,b)=> a.score-b.score || a.time-b.time);
+  } else {
+    leaderboard[game][mode].sort((a,b)=> a.time-b.time);
+  }
+  leaderboard[game][mode] = leaderboard[game][mode].slice(0,100);
+  localStorage.setItem("arcadeLeaderboard", JSON.stringify(leaderboard));
+}
+function showLeaderboard(game, mode, containerId) {
+  let div=document.createElement("div");
+  div.className="leaderboard";
+  div.innerHTML="<h3>Leaderboard - "+game+" ("+mode+")</h3>";
+  let list=leaderboard[game]&&leaderboard[game][mode]?leaderboard[game][mode]:[];
+  div.innerHTML+="<ol>"+list.map(e=>"<li>"+e.name+" - "+(e.score!==undefined?("Attempts:"+e.score+", Time:"+e.time.toFixed(3)+"s"):e.time.toFixed(3)+"s")+"</li>").join("")+"</ol>";
+  document.getElementById(containerId).appendChild(div);
+}
+function askReturn() {
+  let btn=document.createElement("button");
+  btn.innerText="Return to Menu";
+  btn.onclick=()=>{document.getElementById("gameArea").innerHTML=""; document.getElementById("menu").style.display="block";};
+  return btn;
+}
+function chooseUsername(game) {
+  document.getElementById("menu").style.display="none";
+  let area=document.getElementById("gameArea");
+  area.innerHTML="<h2>Enter your username</h2>";
+  let input=document.createElement("input"); input.placeholder="Username";
+  let btn=document.createElement("button"); btn.innerText="Start";
+  btn.onclick=()=>{let name=input.value.trim(); if(name){startGame(game,name);}};
+  area.appendChild(input); area.appendChild(btn);
+}
+function startGame(game,name) {
+  if (game==="guessNumber") startGuessNumber(name);
+  if (game==="mathQuiz") startMathQuiz(name);
+  if (game==="reaction") startReaction(name);
+  if (game==="gibberish") startGibberish(name);
+  if (game==="numMemory") startNumMemory(name);
+  if (game==="seqTap") startSeqTap(name);
+  if (game==="wordChain") startWordChain(name);
 }
 
-// Show selected game
-function startGame(game){
-    document.querySelectorAll('.game-container').forEach(c=>c.style.display='none');
-    document.getElementById(game).style.display='block';
-    switch(game){
-        case 'guessNumber': runGuessNumber(); break;
-        case 'mathQuiz': runMathQuiz(); break;
-        case 'reaction': runReaction(); break;
-        case 'typing': runGibberishTyping(); break;
-        case 'numMemory': runNumberMemory(); break;
-        case 'seqTap': runSequenceTap(); break;
-        case 'wordChain': runWordChain(); break;
+// =============== Games ===============
+
+// Guess the Number
+function startGuessNumber(username){
+  let area=document.getElementById("gameArea");
+  area.innerHTML="<h2>Guess the Number</h2>";
+  let num=Math.floor(Math.random()*100)+1; let attempts=0; let start=performance.now();
+  let input=document.createElement("input"); input.type="number";
+  let btn=document.createElement("button"); btn.innerText="Submit";
+  let info=document.createElement("div");
+  area.appendChild(input); area.appendChild(btn); area.appendChild(info);
+  btn.onclick=function(){
+    let guess=parseInt(input.value); attempts++;
+    if(guess===num){
+      let time=(performance.now()-start)/1000;
+      info.innerHTML=`Correct! Number was ${num}. Attempts: ${attempts}`;
+      saveLeaderboard("guessNumber","1-100",{name:username,score:attempts,time});
+      let your=document.createElement("div"); your.innerText=`Your Score: ${attempts} attempts, ${time.toFixed(3)}s`; area.appendChild(your);
+      showLeaderboard("guessNumber","1-100","gameArea");
+      area.appendChild(askReturn());
+      btn.disabled=true;
+    } else if(guess<num) info.innerText="Too low!";
+    else info.innerText="Too high!";
+  };
+  input.addEventListener("keydown",e=>{if(e.key==="Enter")btn.click();});
+}
+
+// Math Quiz
+function startMathQuiz(username){
+  let area=document.getElementById("gameArea"); area.innerHTML="<h2>Math Quiz</h2>";
+  let qcount=5, current=0, correct=0; let start=performance.now();
+  let a=document.createElement("div"); let input=document.createElement("input"); let btn=document.createElement("button"); btn.innerText="Submit"; let info=document.createElement("div");
+  area.appendChild(a); area.appendChild(input); area.appendChild(btn); area.appendChild(info);
+  let x,y,ans; function newQ(){x=Math.floor(Math.random()*10)+1; y=Math.floor(Math.random()*10)+1; ans=x+y; a.innerText=`${x}+${y}=?`; input.value="";}
+  newQ();
+  btn.onclick=function(){
+    if(parseInt(input.value)===ans) correct++;
+    current++;
+    if(current<qcount){newQ();}
+    else{
+      let time=(performance.now()-start)/1000;
+      info.innerHTML=`You got ${correct}/${qcount} correct.`;
+      saveLeaderboard("mathQuiz",qcount+"Q",{name:username,time});
+      let your=document.createElement("div"); your.innerText=`Your Score: ${time.toFixed(3)}s`; area.appendChild(your);
+      showLeaderboard("mathQuiz",qcount+"Q","gameArea");
+      area.appendChild(askReturn()); btn.disabled=true;
     }
-}
-function backToMenu(){
-    document.querySelectorAll('.game-container').forEach(c=>c.style.display='none');
-    document.getElementById('gameSelection').style.display='block';
+  };
+  input.addEventListener("keydown",e=>{if(e.key==="Enter")btn.click();});
 }
 
-// ---------- Leaderboard Storage ----------
-function saveLeaderboard(game,mode,data){
-    let key=game+'_'+mode;
-    let arr=JSON.parse(localStorage.getItem(key)||'[]');
-    arr.push(data);
-    arr.sort((a,b)=>{
-        if(a.score!==b.score) return a.score-b.score; 
-        return a.time-b.time;
-    });
-    localStorage.setItem(key,JSON.stringify(arr.slice(0,100)));
+// Reaction Game
+function startReaction(username){
+  let area=document.getElementById("gameArea"); area.innerHTML="<h2>Reaction Game</h2><p>Click when it turns green!</p>";
+  let box=document.createElement("div"); box.style.width="200px"; box.style.height="200px"; box.style.background="red"; box.style.margin="20px auto"; area.appendChild(box);
+  let start,timeout;
+  box.onclick=function(){ if(!start){area.innerHTML="<p>Too early!</p>"; area.appendChild(askReturn()); return;}
+    let t=(performance.now()-start)/1000; area.innerHTML=`<p>Your reaction: ${t.toFixed(3)}s</p>`; saveLeaderboard("reaction","1",{name:username,time:t}); showLeaderboard("reaction","1","gameArea"); area.appendChild(askReturn());
+  };
+  timeout=setTimeout(()=>{box.style.background="green"; start=performance.now();},Math.random()*3000+2000);
 }
 
-function showLeaderboard(game,mode,containerId){
-    let key=game+'_'+mode;
-    let arr=JSON.parse(localStorage.getItem(key)||'[]');
-    let container=document.getElementById(containerId);
-    container.innerHTML='<b>Leaderboard:</b><br>';
-    arr.forEach((e,i)=>{
-        container.innerHTML+=`${i+1}. ${e.name} - Time: ${e.time.toFixed(3)}s<br>`;
-    });
+// Gibberish Typing
+function startGibberish(username){
+  let area=document.getElementById("gameArea"); area.innerHTML="<h2>Gibberish Typing</h2>";
+  let words=[]; for(let i=0;i<20;i++) words.push(Math.random().toString(36).substring(2,7));
+  let prompt=document.createElement("div"); prompt.innerText=words.join(" "); area.appendChild(prompt);
+  let input=document.createElement("textarea"); area.appendChild(input); let btn=document.createElement("button"); btn.innerText="Submit"; area.appendChild(btn); let info=document.createElement("div"); area.appendChild(info);
+  let start=performance.now();
+  btn.onclick=function(){
+    let typed=input.value.trim().split(/\s+/);
+    let correct=true; if(typed.length!==words.length) correct=false;
+    else{for(let i=0;i<words.length;i++){if(typed[i]!==words[i]) correct=false;}}
+    let time=(performance.now()-start)/1000;
+    if(correct){
+      info.innerText="Perfect!";
+      saveLeaderboard("gibberish","20",{name:username,time});
+      let your=document.createElement("div"); your.innerText=`Your Score: ${time.toFixed(3)}s`; area.appendChild(your);
+      showLeaderboard("gibberish","20","gameArea");
+    } else info.innerText="Incorrect, not saved.";
+    area.appendChild(askReturn()); btn.disabled=true;
+  };
+  input.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.ctrlKey)btn.click();});
 }
 
-// Include full game JS here (from previous message)
+// Number Memory
+function startNumMemory(username){
+  let area=document.getElementById("gameArea"); area.innerHTML="<h2>Number Memory</h2>";
+  let num=Math.floor(Math.random()*9000)+1000; let prompt=document.createElement("div"); prompt.innerText=num; area.appendChild(prompt);
+  setTimeout(()=>{prompt.innerText=""; let input=document.createElement("input"); area.appendChild(input); let btn=document.createElement("button"); btn.innerText="Submit"; area.appendChild(btn); let info=document.createElement("div"); area.appendChild(info); let start=performance.now();
+    btn.onclick=function(){let val=input.value; let t=(performance.now()-start)/1000; if(val==num){info.innerText="Correct!"; saveLeaderboard("numMemory",num.toString().length,{name:username,time:t}); let your=document.createElement("div"); your.innerText=`Your Score: ${t.toFixed(3)}s`; area.appendChild(your); showLeaderboard("numMemory",num.toString().length,"gameArea");} else info.innerText="Incorrect, not saved."; area.appendChild(askReturn()); btn.disabled=true;};
+    input.addEventListener("keydown",e=>{if(e.key==="Enter")btn.click();});
+  },2000);
+}
+
+// Sequence Tap (colors)
+function startSeqTap(username){
+  let area=document.getElementById("gameArea"); area.innerHTML="<h2>Sequence Tap</h2>";
+  let colors=["red","blue","green","yellow"]; let seq=[]; for(let i=0;i<4;i++) seq.push(colors[Math.floor(Math.random()*colors.length)]);
+  let boxes=seq.map(c=>`<div class='colorBox' style='background:${c}'></div>`).join(""); let prompt=document.createElement("div"); prompt.innerHTML=boxes; area.appendChild(prompt);
+  setTimeout(()=>{prompt.innerHTML=""; let input=document.createElement("input"); input.placeholder="Enter colors separated by space"; area.appendChild(input); let btn=document.createElement("button"); btn.innerText="Submit"; area.appendChild(btn); let info=document.createElement("div"); area.appendChild(info); let start=performance.now();
+    btn.onclick=function(){let typed=input.value.trim().split(/\s+/); let t=(performance.now()-start)/1000; let correct=JSON.stringify(typed)===JSON.stringify(seq); if(correct){info.innerText="Correct!"; saveLeaderboard("seqTap","4",{name:username,time:t}); let your=document.createElement("div"); your.innerText=`Your Score: ${t.toFixed(3)}s`; area.appendChild(your); showLeaderboard("seqTap","4","gameArea");} else info.innerText="Incorrect, not saved."; area.appendChild(askReturn()); btn.disabled=true;};
+    input.addEventListener("keydown",e=>{if(e.key==="Enter")btn.click();});
+  },2000);
+}
+
+// Word Memory Chain
+function startWordChain(username){
+  let area=document.getElementById("gameArea"); area.innerHTML="<h2>Word Memory Chain</h2>";
+  let words=["apple","cat","table","blue","river","green","stone","music","game","sun"]; let seq=[]; for(let i=0;i<5;i++) seq.push(words[Math.floor(Math.random()*words.length)]);
+  let prompt=document.createElement("div"); prompt.innerText=seq.join(" "); area.appendChild(prompt);
+  setTimeout(()=>{prompt.innerText=""; let input=document.createElement("input"); area.appendChild(input); let btn=document.createElement("button"); btn.innerText="Submit"; area.appendChild(btn); let info=document.createElement("div"); area.appendChild(info); let start=performance.now();
+    btn.onclick=function(){let typed=input.value.trim().split(/\s+/); let t=(performance.now()-start)/1000; let correct=JSON.stringify(typed)===JSON.stringify(seq); if(correct){info.innerText="Correct!"; saveLeaderboard("wordChain","5",{name:username,time:t}); let your=document.createElement("div"); your.innerText=`Your Score: ${t.toFixed(3)}s`; area.appendChild(your); showLeaderboard("wordChain","5","gameArea");} else info.innerText="Incorrect, not saved."; area.appendChild(askReturn()); btn.disabled=true;};
+    input.addEventListener("keydown",e=>{if(e.key==="Enter")btn.click();});
+  },3000);
+}
 </script>
-
 </body>
 </html>
-
-
